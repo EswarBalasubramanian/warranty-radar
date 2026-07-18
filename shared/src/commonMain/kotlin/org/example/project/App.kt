@@ -69,23 +69,28 @@ private val Backdrop = Brush.linearGradient(
 )
 
 private enum class AppScreen { Dashboard, PasteReceipt }
+private data class SavedReceipt(val title: String)
 
 @Composable
 @Preview
 fun App() {
     var screen by remember { mutableStateOf(AppScreen.Dashboard) }
+    var savedReceipt by remember { mutableStateOf<SavedReceipt?>(null) }
     MaterialTheme {
         when (screen) {
             AppScreen.Dashboard -> Box(modifier = Modifier.fillMaxSize().background(Backdrop)) {
-                HomeScreen(onAddReceipt = { screen = AppScreen.PasteReceipt })
+                HomeScreen(onAddReceipt = { screen = AppScreen.PasteReceipt }, savedReceipt = savedReceipt)
             }
-            AppScreen.PasteReceipt -> PasteReceiptScreen(onSaved = { screen = AppScreen.Dashboard })
+            AppScreen.PasteReceipt -> PasteReceiptScreen(onSaved = { title ->
+                savedReceipt = SavedReceipt(title)
+                screen = AppScreen.Dashboard
+            })
         }
     }
 }
 
 @Composable
-private fun HomeScreen(onAddReceipt: () -> Unit) {
+private fun HomeScreen(onAddReceipt: () -> Unit, savedReceipt: SavedReceipt?) {
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
@@ -97,10 +102,10 @@ private fun HomeScreen(onAddReceipt: () -> Unit) {
         ) {
             item { LibraryHeader() }
             item { SearchField() }
-            item { CoverageOverview() }
+            item { CoverageOverview(savedReceipt != null) }
             item { CategoryFilters() }
             item { AttentionQueue() }
-            item { PurchaseLibrary() }
+            item { PurchaseLibrary(savedReceipt) }
         }
         BottomNavigation(onAddReceipt)
     }
@@ -153,7 +158,7 @@ private fun SearchField() {
 }
 
 @Composable
-private fun CoverageOverview() {
+private fun CoverageOverview(hasNewReceipt: Boolean) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
@@ -168,7 +173,7 @@ private fun CoverageOverview() {
             Spacer(Modifier.height(15.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 MetricTile(Modifier.weight(1f), "£4,260", "Covered value", "+8% this month", SoftPrimary, Primary)
-                MetricTile(Modifier.weight(1f), "24", "Saved purchases", "8 stores", SoftMint, Success)
+                MetricTile(Modifier.weight(1f), if (hasNewReceipt) "25" else "24", "Saved purchases", "8 stores", SoftMint, Success)
             }
         }
     }
@@ -272,11 +277,20 @@ private fun ReviewItem(title: String, subtitle: String, time: String, accent: Co
 }
 
 @Composable
-private fun PurchaseLibrary() {
+private fun PurchaseLibrary(savedReceipt: SavedReceipt?) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Your purchases", color = Ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-            Text("24 items", color = MutedInk, fontSize = 12.sp)
+            Text(if (savedReceipt != null) "25 items" else "24 items", color = MutedInk, fontSize = 12.sp)
+        }
+        if (savedReceipt != null) {
+            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), color = SoftPrimary) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(savedReceipt.title, color = Ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(3.dp))
+                    Text("Receipt saved · warranty details pending", color = Primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                }
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(modifier = Modifier.weight(1f)) {
@@ -483,7 +497,7 @@ private fun FilterIcon(color: Color) {
     }
 }
 @Composable
-private fun PasteReceiptScreen(onSaved: () -> Unit) {
+private fun PasteReceiptScreen(onSaved: (String) -> Unit) {
     var receiptText by remember { mutableStateOf("") }
     val surface = Color(0xFFF7F8F5)
     val accent = Color(0xFF0D766E)
@@ -507,7 +521,7 @@ private fun PasteReceiptScreen(onSaved: () -> Unit) {
             Spacer(Modifier.height(28.dp))
             ReceiptUploadPlaceholder()
             Spacer(Modifier.weight(1f))
-            Button(onClick = onSaved, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = accent)) { Text("Save receipt", fontWeight = FontWeight.Bold) }
+            Button(onClick = { onSaved(receiptText.trim().lineSequence().firstOrNull()?.take(28).orEmpty().ifBlank { "New receipt" }) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = accent)) { Text("Save receipt", fontWeight = FontWeight.Bold) }
         }
     }
 }
