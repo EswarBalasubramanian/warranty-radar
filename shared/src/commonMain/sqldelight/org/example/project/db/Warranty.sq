@@ -1,0 +1,21 @@
+CREATE TABLE warrantyEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    productName TEXT NOT NULL,
+    store TEXT NOT NULL,
+    category TEXT NOT NULL,
+    purchaseDateLabel TEXT NOT NULL,
+    warrantyStatusLabel TEXT NOT NULL,
+    urgencyDays INTEGER,
+    price REAL,
+    shape TEXT NOT NULL
+);
+
+selectAll:
+SELECT * FROM warrantyEntity;
+
+countAll:
+SELECT COUNT(*) FROM warrantyEntity;
+
+insertWarranty:
+INSERT INTO warrantyEntity(id, productName, store, category, purchaseDateLabel, warrantyStatusLabel, urgencyDays, price, shape)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
