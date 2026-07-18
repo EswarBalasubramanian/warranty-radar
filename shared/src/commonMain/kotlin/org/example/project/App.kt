@@ -54,7 +54,7 @@ fun App(driverFactory: DatabaseDriverFactory) {
         Box(modifier = Modifier.fillMaxSize()) {
             when (screen) {
                 AppScreen.Home -> AppScaffold(AppScreen.Home, onNavigate = { screen = it }, onAddReceipt = { screen = AppScreen.PasteReceipt }) {
-                    HomeScreen(warranties)
+                    HomeScreen(warranties, onScanReceipt = { screen = AppScreen.PasteReceipt })
                 }
                 AppScreen.Items -> AppScaffold(AppScreen.Items, onNavigate = { screen = it }, onAddReceipt = { screen = AppScreen.PasteReceipt }) {
                     ItemsScreen(warranties)

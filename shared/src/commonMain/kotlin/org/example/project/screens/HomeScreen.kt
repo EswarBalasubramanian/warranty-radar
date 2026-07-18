@@ -1,7 +1,6 @@
 package org.example.project.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,39 +27,45 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.project.components.ALL_CATEGORIES
+import org.example.project.components.BellIcon
 import org.example.project.components.CategoryFilters
-import org.example.project.components.MetricTile
+import org.example.project.components.ProductArtwork
 import org.example.project.components.PurchaseLibrary
 import org.example.project.components.ReceiptPerforation
-import org.example.project.components.ReviewItem
+import org.example.project.components.ScanReceiptButton
 import org.example.project.components.SearchField
+import org.example.project.components.WarrantyRing
 import org.example.project.components.categoriesFor
 import org.example.project.components.coverageSubtitle
+import org.example.project.components.endsPhrase
 import org.example.project.components.filterWarranties
 import org.example.project.components.formatCurrency
-import org.example.project.components.friendlyTimeLeft
 import org.example.project.components.greetingFor
+import org.example.project.components.heroStatusLine
 import org.example.project.components.urgencyColor
-import org.example.project.components.urgencyFraction
 import org.example.project.model.Warranty
 import org.example.project.theme.AppTheme
 
 @Composable
-fun HomeScreen(warranties: List<Warranty>) {
-    val colors = AppTheme.colors
+fun HomeScreen(warranties: List<Warranty>, onScanReceipt: () -> Unit) {
     var query by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(ALL_CATEGORIES) }
 
     val categories = remember(warranties) { categoriesFor(warranties) }
     val filtered = remember(warranties, query, selectedCategory) { filterWarranties(warranties, query, selectedCategory) }
     val attentionItems = remember(warranties) { warranties.filter { it.urgencyDays != null }.sortedBy { it.urgencyDays } }
+    val heroItem = remember(warranties) {
+        warranties.maxByOrNull { it.urgencyDays ?: Int.MAX_VALUE }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -70,8 +75,13 @@ fun HomeScreen(warranties: List<Warranty>) {
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         item { LibraryHeader(subtitle = coverageSubtitle(warranties.size, attentionItems.size)) }
+        if (heroItem != null) {
+            item { HeroCard(heroItem) }
+        }
+        if (attentionItems.isNotEmpty()) {
+            item { AttentionBanner(attentionItems) }
+        }
         item { SearchField(query = query, onQueryChange = { query = it }) }
-        item { CoverageOverview(warranties) }
         item {
             CategoryFilters(
                 categories = categories,
@@ -79,10 +89,12 @@ fun HomeScreen(warranties: List<Warranty>) {
                 onSelect = { selectedCategory = it }
             )
         }
-        if (attentionItems.isNotEmpty()) {
-            item { AttentionQueue(attentionItems) }
-        }
         item { PurchaseLibrary(filtered) }
+        item {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                ScanReceiptButton(onClick = onScanReceipt)
+            }
+        }
     }
 }
 
@@ -95,27 +107,34 @@ private fun LibraryHeader(subtitle: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(greetingFor(hour, "Alex"), color = colors.ink, fontSize = 23.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                greetingFor(hour, "Naveen"),
+                color = colors.ink,
+                fontSize = 23.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.Serif
+            )
             Spacer(Modifier.height(3.dp))
             Text(subtitle, color = colors.mutedInk, fontSize = 12.sp)
         }
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(38.dp)
                 .clip(CircleShape)
-                .background(colors.glass),
+                .background(colors.butter),
             contentAlignment = Alignment.Center
         ) {
-            Text("AM", color = colors.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text("NG", color = colors.amber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
 
 @Composable
-private fun CoverageOverview(warranties: List<Warranty>) {
+private fun HeroCard(warranty: Warranty) {
     val colors = AppTheme.colors
-    val totalValue = warranties.sumOf { it.price ?: 0.0 }
-    val storeCount = warranties.map { it.store }.distinct().size
+    val days = warranty.urgencyDays
+    val fraction = if (days != null) (days / 365f).coerceIn(0.08f, 1f) else 1f
+    val ringColor = if (days != null) urgencyColor(days, colors) else colors.success
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
@@ -124,44 +143,79 @@ private fun CoverageOverview(warranties: List<Warranty>) {
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Your safety net", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                Text("•••", color = colors.mutedInk, fontSize = 13.sp, letterSpacing = 1.sp)
+                Box(modifier = Modifier.size(58.dp), contentAlignment = Alignment.Center) {
+                    WarrantyRing(
+                        fraction = fraction,
+                        color = ringColor,
+                        modifier = Modifier.size(58.dp),
+                        strokeWidth = 5.dp
+                    )
+                    ProductArtwork(warranty.shape, colors.ink.copy(alpha = 0.8f), iconSize = 28.dp)
+                }
+                Spacer(Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        warranty.productName,
+                        color = colors.ink,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(heroStatusLine(days), color = ringColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                }
             }
-            Spacer(Modifier.height(11.dp))
+            Spacer(Modifier.height(14.dp))
             ReceiptPerforation()
-            Spacer(Modifier.height(13.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                MetricTile(Modifier.weight(1f), formatCurrency(totalValue), "Covered value", "${warranties.size} items", colors.softPrimary, colors.primary)
-                MetricTile(Modifier.weight(1f), warranties.size.toString(), "Saved purchases", "$storeCount stores", colors.softMint, colors.success)
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "${warranty.store} · ${warranty.purchaseDateLabel}",
+                    color = colors.mutedInk,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                if (warranty.price != null) {
+                    Text(formatCurrency(warranty.price), color = colors.ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun AttentionQueue(items: List<Warranty>) {
+private fun AttentionBanner(items: List<Warranty>) {
     val colors = AppTheme.colors
-    Column(verticalArrangement = Arrangement.spacedBy(11.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Worth a quick look", color = colors.ink, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-            Text(if (items.size == 1) "1 item" else "${items.size} items", color = colors.alert, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-        }
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, colors.border, RoundedCornerShape(22.dp)),
-            shape = RoundedCornerShape(22.dp),
-            color = colors.glass,
-            shadowElevation = 5.dp
+    val urgent = items.first()
+    val days = urgent.urgencyDays ?: 0
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = colors.blush
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 13.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                items.forEachIndexed { index, warranty ->
-                    val days = warranty.urgencyDays ?: 0
-                    val accent = urgencyColor(days, colors)
-                    ReviewItem(warranty.productName, warranty.warrantyStatusLabel, friendlyTimeLeft(days), accent, progress = urgencyFraction(days))
-                    if (index != items.lastIndex) {
-                        ReceiptPerforation()
-                    }
+            BellIcon(colors.alert, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(11.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Your ${urgent.productName}'s warranty ${endsPhrase(days)}. Worth a quick look?",
+                    color = colors.ink,
+                    fontSize = 12.sp,
+                    lineHeight = 17.sp
+                )
+                if (items.size > 1) {
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        if (items.size == 2) "…and 1 more to check" else "…and ${items.size - 1} more to check",
+                        color = colors.mutedInk,
+                        fontSize = 11.sp
+                    )
                 }
             }
         }

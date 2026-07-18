@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -136,33 +135,17 @@ fun ProductTile(warranty: Warranty) {
             .pressBounce(0.965f)
             .clip(tileShape),
         shape = tileShape,
-        color = colors.paper,
-        shadowElevation = 5.dp
+        color = artworkColor,
+        shadowElevation = 2.dp
     ) {
-        Column {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1.24f)
-                    .background(artworkColor),
-                contentAlignment = Alignment.Center
-            ) {
-                ProductArtwork(warranty.shape, colors.ink.copy(alpha = 0.76f))
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(colors.paper)
-                    .padding(13.dp)
-            ) {
-                Text(warranty.productName, color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.height(3.dp))
-                Text(warranty.store, color = colors.mutedInk, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.height(9.dp))
-                ReceiptPerforation()
-                Spacer(Modifier.height(9.dp))
-                Text(statusLabel, color = statusColor, fontSize = 11.sp, fontWeight = FontWeight.Medium)
-            }
+        Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
+            ProductArtwork(warranty.shape, colors.ink.copy(alpha = 0.78f), iconSize = 34.dp)
+            Spacer(Modifier.height(10.dp))
+            Text(warranty.productName, color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(2.dp))
+            Text(warranty.store, color = colors.mutedInk, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(7.dp))
+            Text(statusLabel, color = statusColor, fontSize = 11.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

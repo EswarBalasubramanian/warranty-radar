@@ -9,7 +9,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.example.project.model.ProductShape
 
@@ -77,8 +79,53 @@ fun NavigationGlyph(icon: NavigationIcon, color: Color) {
 }
 
 @Composable
-fun ProductArtwork(shape: ProductShape, color: Color) {
-    Canvas(modifier = Modifier.size(74.dp)) {
+fun BellIcon(color: Color, modifier: Modifier = Modifier.size(18.dp)) {
+    Canvas(modifier) {
+        val stroke = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round)
+        val w = size.width
+        val h = size.height
+        val body = Path().apply {
+            moveTo(w * 0.22f, h * 0.66f)
+            lineTo(w * 0.22f, h * 0.44f)
+            cubicTo(w * 0.22f, h * 0.16f, w * 0.78f, h * 0.16f, w * 0.78f, h * 0.44f)
+            lineTo(w * 0.78f, h * 0.66f)
+        }
+        drawPath(body, color, style = stroke)
+        drawLine(color, Offset(w * 0.12f, h * 0.66f), Offset(w * 0.88f, h * 0.66f), strokeWidth = stroke.width, cap = StrokeCap.Round)
+        drawCircle(color, radius = w * 0.07f, center = Offset(w * 0.50f, h * 0.82f))
+    }
+}
+
+@Composable
+fun ScanIcon(color: Color, modifier: Modifier = Modifier.size(18.dp)) {
+    Canvas(modifier) {
+        val strokeWidth = 1.7.dp.toPx()
+        val w = size.width
+        val h = size.height
+        val corner = w * 0.26f
+        val inset = 1.dp.toPx()
+        val corners = Path().apply {
+            moveTo(inset, inset + corner)
+            lineTo(inset, inset)
+            lineTo(inset + corner, inset)
+            moveTo(w - inset - corner, inset)
+            lineTo(w - inset, inset)
+            lineTo(w - inset, inset + corner)
+            moveTo(w - inset, h - inset - corner)
+            lineTo(w - inset, h - inset)
+            lineTo(w - inset - corner, h - inset)
+            moveTo(inset + corner, h - inset)
+            lineTo(inset, h - inset)
+            lineTo(inset, h - inset - corner)
+        }
+        drawPath(corners, color, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
+        drawLine(color, Offset(w * 0.24f, h * 0.5f), Offset(w * 0.76f, h * 0.5f), strokeWidth = strokeWidth, cap = StrokeCap.Round)
+    }
+}
+
+@Composable
+fun ProductArtwork(shape: ProductShape, color: Color, iconSize: Dp = 74.dp) {
+    Canvas(modifier = Modifier.size(iconSize)) {
         val stroke = Stroke(width = 2.dp.toPx())
         val thinStroke = Stroke(width = 1.4.dp.toPx())
         val w = size.width
