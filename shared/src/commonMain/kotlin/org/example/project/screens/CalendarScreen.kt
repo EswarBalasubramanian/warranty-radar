@@ -1,14 +1,11 @@
 package org.example.project.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,8 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.example.project.components.ReceiptPerforation
 import org.example.project.components.ReviewItem
+import org.example.project.components.friendlyTimeLeft
 import org.example.project.components.urgencyColor
+import org.example.project.components.urgencyFraction
 import org.example.project.model.Warranty
 import org.example.project.theme.AppTheme
 
@@ -44,7 +44,7 @@ fun CalendarScreen(warranties: List<Warranty>) {
         item {
             Column {
                 Text("Calendar", color = colors.ink, fontSize = 23.sp, fontWeight = FontWeight.SemiBold)
-                Text("Warranty and return deadlines", color = colors.mutedInk, fontSize = 12.sp)
+                Text("We'll nudge you before anything runs out", color = colors.mutedInk, fontSize = 12.sp)
             }
         }
         if (thisWeek.isNotEmpty()) item { DeadlineSection("This week", thisWeek) }
@@ -55,7 +55,7 @@ fun CalendarScreen(warranties: List<Warranty>) {
             item {
                 Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), color = colors.glass) {
                     Text(
-                        "No purchases yet. Add a receipt to start tracking deadlines.",
+                        "Nothing to watch yet — scan a receipt and we'll keep an eye on the dates for you.",
                         color = colors.mutedInk,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(18.dp)
@@ -82,9 +82,9 @@ private fun DeadlineSection(title: String, items: List<Warranty>) {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 items.forEachIndexed { index, warranty ->
                     val days = warranty.urgencyDays ?: 0
-                    ReviewItem(warranty.productName, warranty.store, "$days days", urgencyColor(days, colors))
+                    ReviewItem(warranty.productName, warranty.store, friendlyTimeLeft(days), urgencyColor(days, colors), progress = urgencyFraction(days))
                     if (index != items.lastIndex) {
-                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.border))
+                        ReceiptPerforation()
                     }
                 }
             }
@@ -109,7 +109,7 @@ private fun NoDeadlineSection(items: List<Warranty>) {
                 items.forEachIndexed { index, warranty ->
                     ReviewItem(warranty.productName, warranty.store, warranty.purchaseDateLabel, colors.mutedInk)
                     if (index != items.lastIndex) {
-                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.border))
+                        ReceiptPerforation()
                     }
                 }
             }

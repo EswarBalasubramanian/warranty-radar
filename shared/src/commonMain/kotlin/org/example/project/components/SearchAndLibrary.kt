@@ -96,7 +96,7 @@ fun PurchaseLibrary(warranties: List<Warranty>, title: String = "Your purchases"
                 color = colors.glass
             ) {
                 Text(
-                    "No purchases match yet. Try a different search or add a receipt.",
+                    "Nothing here yet. Try another search — or scan a receipt and we'll keep it safe.",
                     color = colors.mutedInk,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(18.dp)

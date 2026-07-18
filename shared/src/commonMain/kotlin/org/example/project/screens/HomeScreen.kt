@@ -31,16 +31,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.example.project.components.ALL_CATEGORIES
 import org.example.project.components.CategoryFilters
 import org.example.project.components.MetricTile
 import org.example.project.components.PurchaseLibrary
+import org.example.project.components.ReceiptPerforation
 import org.example.project.components.ReviewItem
 import org.example.project.components.SearchField
 import org.example.project.components.categoriesFor
+import org.example.project.components.coverageSubtitle
 import org.example.project.components.filterWarranties
 import org.example.project.components.formatCurrency
+import org.example.project.components.friendlyTimeLeft
+import org.example.project.components.greetingFor
 import org.example.project.components.urgencyColor
+import org.example.project.components.urgencyFraction
 import org.example.project.model.Warranty
 import org.example.project.theme.AppTheme
 
@@ -61,7 +69,7 @@ fun HomeScreen(warranties: List<Warranty>) {
         contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        item { LibraryHeader() }
+        item { LibraryHeader(subtitle = coverageSubtitle(warranties.size, attentionItems.size)) }
         item { SearchField(query = query, onQueryChange = { query = it }) }
         item { CoverageOverview(warranties) }
         item {
@@ -79,16 +87,17 @@ fun HomeScreen(warranties: List<Warranty>) {
 }
 
 @Composable
-private fun LibraryHeader() {
+private fun LibraryHeader(subtitle: String) {
     val colors = AppTheme.colors
+    val hour = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour }
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text("Good morning, Alex", color = colors.ink, fontSize = 23.sp, fontWeight = FontWeight.SemiBold)
+            Text(greetingFor(hour, "Alex"), color = colors.ink, fontSize = 23.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(3.dp))
-            Text("Here's your purchase library", color = colors.mutedInk, fontSize = 12.sp)
+            Text(subtitle, color = colors.mutedInk, fontSize = 12.sp)
         }
         Box(
             modifier = Modifier
@@ -115,10 +124,12 @@ private fun CoverageOverview(warranties: List<Warranty>) {
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Library overview", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                Text("Your safety net", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
                 Text("•••", color = colors.mutedInk, fontSize = 13.sp, letterSpacing = 1.sp)
             }
-            Spacer(Modifier.height(15.dp))
+            Spacer(Modifier.height(11.dp))
+            ReceiptPerforation()
+            Spacer(Modifier.height(13.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 MetricTile(Modifier.weight(1f), formatCurrency(totalValue), "Covered value", "${warranties.size} items", colors.softPrimary, colors.primary)
                 MetricTile(Modifier.weight(1f), warranties.size.toString(), "Saved purchases", "$storeCount stores", colors.softMint, colors.success)
@@ -132,8 +143,8 @@ private fun AttentionQueue(items: List<Warranty>) {
     val colors = AppTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(11.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Needs attention", color = colors.ink, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-            Text("${items.size} items", color = colors.alert, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            Text("Worth a quick look", color = colors.ink, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+            Text(if (items.size == 1) "1 item" else "${items.size} items", color = colors.alert, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
         Surface(
             modifier = Modifier
@@ -147,9 +158,9 @@ private fun AttentionQueue(items: List<Warranty>) {
                 items.forEachIndexed { index, warranty ->
                     val days = warranty.urgencyDays ?: 0
                     val accent = urgencyColor(days, colors)
-                    ReviewItem(warranty.productName, warranty.warrantyStatusLabel, "$days days", accent)
+                    ReviewItem(warranty.productName, warranty.warrantyStatusLabel, friendlyTimeLeft(days), accent, progress = urgencyFraction(days))
                     if (index != items.lastIndex) {
-                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.border))
+                        ReceiptPerforation()
                     }
                 }
             }
