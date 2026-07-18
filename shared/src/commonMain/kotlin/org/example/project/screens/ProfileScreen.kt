@@ -57,14 +57,14 @@ private fun ProfileHeader() {
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(colors.glass),
+                .background(colors.butter),
             contentAlignment = Alignment.Center
         ) {
-            Text("AM", color = colors.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text("NG", color = colors.amber, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(Modifier.width(12.dp))
         Column {
-            Text("Alex Morgan", color = colors.ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+            Text("Naveen Gunasekaran", color = colors.ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
             Text("Keeping every purchase covered", color = colors.mutedInk, fontSize = 12.sp)
         }
     }

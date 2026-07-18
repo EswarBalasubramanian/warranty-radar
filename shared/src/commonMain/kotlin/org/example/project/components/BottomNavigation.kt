@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import org.example.project.AppScreen
 import org.example.project.theme.AppTheme
@@ -49,10 +51,16 @@ fun BottomNavigation(current: AppScreen, onNavigate: (AppScreen) -> Unit, onAddR
 @Composable
 private fun NavigationItem(modifier: Modifier, icon: NavigationIcon, selected: Boolean, onClick: () -> Unit) {
     val colors = AppTheme.colors
-    Box(modifier = modifier.height(48.dp).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+    val haptic = LocalHapticFeedback.current
+    val clickWithFeedback: () -> Unit = {
+        if (icon == NavigationIcon.Add) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        onClick()
+    }
+    Box(modifier = modifier.height(48.dp).clickable(onClick = clickWithFeedback), contentAlignment = Alignment.Center) {
         if (icon == NavigationIcon.Add) {
             Box(
                 modifier = Modifier
+                    .pressBounce(0.88f)
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(colors.primary),

@@ -39,12 +39,12 @@ data class AppColorScheme(
 )
 
 val LightAppColors = AppColorScheme(
-    ink = Color(0xFF323748),
-    mutedInk = Color(0xFF858C9D),
-    paper = Color(0xFFFFFFFF),
-    glass = Color(0xFFFDFDFF),
+    ink = Color(0xFF37332B),
+    mutedInk = Color(0xFF8D867A),
+    paper = Color(0xFFFFFDF8),
+    glass = Color(0xFFFFFDF6),
     border = Color(0xFFFFFFFF).copy(alpha = 0.82f),
-    divider = Color(0xFFDDE3E1),
+    divider = Color(0xFFE7DFD2),
     primary = Color(0xFF287EEF),
     softPrimary = Color(0xFFE9F2FF),
     softLilac = Color(0xFFECE6FF),
@@ -55,20 +55,20 @@ val LightAppColors = AppColorScheme(
     alert = Color(0xFFEF6254),
     amber = Color(0xFF9B7422),
     success = Color(0xFF45AD78),
-    backdrop = Brush.linearGradient(colors = listOf(Color(0xFFDCC1FF), Color(0xFFCDEAFF), Color(0xFFE5F4F0))),
-    screenSurface = Color(0xFFF7F8F5),
+    backdrop = Brush.linearGradient(colors = listOf(Color(0xFFF6DFC4), Color(0xFFFAF0DC), Color(0xFFE3EFE0))),
+    screenSurface = Color(0xFFFBF7EF),
     accent = Color(0xFF0D766E),
     uploadBorder = Color(0xFF9BCFC9),
     uploadBackground = Color(0xFFDDF3F0),
-    uploadIconBackground = Color(0xFFFFFFFF),
-    secondaryButtonBackground = Color(0xFFE4E7E5)
+    uploadIconBackground = Color(0xFFFFFDF8),
+    secondaryButtonBackground = Color(0xFFEAE4D8)
 )
 
 val DarkAppColors = AppColorScheme(
-    ink = Color(0xFFEDEEF3),
-    mutedInk = Color(0xFFA0A6B5),
-    paper = Color(0xFF1C1E27),
-    glass = Color(0xFF242631),
+    ink = Color(0xFFF0EBE2),
+    mutedInk = Color(0xFFA69E90),
+    paper = Color(0xFF211E19),
+    glass = Color(0xFF2A261F),
     border = Color(0xFFFFFFFF).copy(alpha = 0.08f),
     divider = Color(0xFFFFFFFF).copy(alpha = 0.12f),
     primary = Color(0xFF5B9DFF),
@@ -81,13 +81,13 @@ val DarkAppColors = AppColorScheme(
     alert = Color(0xFFFF6B5C),
     amber = Color(0xFFE0A83D),
     success = Color(0xFF5FD08A),
-    backdrop = Brush.linearGradient(colors = listOf(Color(0xFF241B36), Color(0xFF16232E), Color(0xFF162A24))),
-    screenSurface = Color(0xFF15161B),
+    backdrop = Brush.linearGradient(colors = listOf(Color(0xFF2B2018), Color(0xFF241F16), Color(0xFF1B211A))),
+    screenSurface = Color(0xFF171511),
     accent = Color(0xFF34B5A6),
     uploadBorder = Color(0xFF2E5C55),
     uploadBackground = Color(0xFF1B2E2B),
-    uploadIconBackground = Color(0xFF232530),
-    secondaryButtonBackground = Color(0xFF2A2C36)
+    uploadIconBackground = Color(0xFF2A261F),
+    secondaryButtonBackground = Color(0xFF2E2A22)
 )
 
 val LocalAppColors = staticCompositionLocalOf { LightAppColors }

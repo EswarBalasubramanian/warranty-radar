@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -71,7 +71,9 @@ fun FilterPill(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(50),
         color = if (selected) colors.primary else colors.glass,
-        modifier = (if (selected) Modifier else Modifier.border(1.dp, colors.border, RoundedCornerShape(50)))
+        modifier = Modifier
+            .pressBounce(0.93f)
+            .then(if (selected) Modifier else Modifier.border(1.dp, colors.border, RoundedCornerShape(50)))
             .clickable(onClick = onClick)
     ) {
         Text(
@@ -85,7 +87,7 @@ fun FilterPill(label: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun ReviewItem(title: String, subtitle: String, time: String, accent: Color) {
+fun ReviewItem(title: String, subtitle: String, time: String, accent: Color, progress: Float? = null) {
     val colors = AppTheme.colors
     Row(
         modifier = Modifier
@@ -93,12 +95,16 @@ fun ReviewItem(title: String, subtitle: String, time: String, accent: Color) {
             .padding(vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(9.dp)
-                .clip(CircleShape)
-                .background(accent)
-        )
+        if (progress != null) {
+            WarrantyRing(fraction = progress, color = accent, modifier = Modifier.size(22.dp))
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(9.dp)
+                    .clip(CircleShape)
+                    .background(accent)
+            )
+        }
         Spacer(Modifier.width(11.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(title, color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -114,36 +120,32 @@ fun ProductTile(warranty: Warranty) {
     val colors = AppTheme.colors
     val artworkColor = tileColorFor(warranty.shape, colors)
     val statusColor = if (warranty.urgencyDays != null) urgencyColor(warranty.urgencyDays, colors) else colors.success
+    val statusLabel = if (warranty.urgencyDays != null) friendlyTimeLeft(warranty.urgencyDays) else warranty.warrantyStatusLabel
+    val seed = warranty.id.hashCode()
+    val tilt = (seed.mod(5) - 2) * 0.4f
+    val tileShape = if (seed.mod(2) == 0) {
+        RoundedCornerShape(topStart = 25.dp, topEnd = 19.dp, bottomEnd = 25.dp, bottomStart = 19.dp)
+    } else {
+        RoundedCornerShape(topStart = 19.dp, topEnd = 25.dp, bottomEnd = 19.dp, bottomStart = 25.dp)
+    }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp)),
-        shape = RoundedCornerShape(22.dp),
-        color = colors.paper,
-        shadowElevation = 5.dp
+            .graphicsLayer { rotationZ = tilt }
+            .pressBounce(0.965f)
+            .clip(tileShape),
+        shape = tileShape,
+        color = artworkColor,
+        shadowElevation = 2.dp
     ) {
-        Column {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1.24f)
-                    .background(artworkColor),
-                contentAlignment = Alignment.Center
-            ) {
-                ProductArtwork(warranty.shape, colors.ink.copy(alpha = 0.76f))
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(colors.paper)
-                    .padding(13.dp)
-            ) {
-                Text(warranty.productName, color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.height(3.dp))
-                Text(warranty.store, color = colors.mutedInk, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.height(9.dp))
-                Text(warranty.warrantyStatusLabel, color = statusColor, fontSize = 11.sp, fontWeight = FontWeight.Medium)
-            }
+        Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
+            ProductArtwork(warranty.shape, colors.ink.copy(alpha = 0.78f), iconSize = 34.dp)
+            Spacer(Modifier.height(10.dp))
+            Text(warranty.productName, color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(2.dp))
+            Text(warranty.store, color = colors.mutedInk, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(7.dp))
+            Text(statusLabel, color = statusColor, fontSize = 11.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
