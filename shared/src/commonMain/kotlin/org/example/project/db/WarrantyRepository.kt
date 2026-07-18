@@ -56,7 +56,8 @@ private fun WarrantyQueries.insertWarranty(warranty: Warranty) {
         warrantyStatusLabel = warranty.warrantyStatusLabel,
         urgencyDays = warranty.urgencyDays?.toLong(),
         price = warranty.price,
-        shape = warranty.shape.name
+        shape = warranty.shape.name,
+        warrantyEndDateLabel = warranty.warrantyEndDateLabel
     )
 }
 
@@ -69,7 +70,8 @@ private fun WarrantyEntity.toWarranty() = Warranty(
     warrantyStatusLabel = warrantyStatusLabel,
     urgencyDays = urgencyDays?.toInt(),
     price = price,
-    shape = ProductShape.valueOf(shape)
+    shape = ProductShape.valueOf(shape),
+    warrantyEndDateLabel = warrantyEndDateLabel
 )
 
 private fun seedWarranties(): List<Warranty> = listOf(

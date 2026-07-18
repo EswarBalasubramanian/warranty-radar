@@ -11,5 +11,6 @@ data class Warranty(
     val warrantyStatusLabel: String,
     val urgencyDays: Int?,
     val price: Double?,
-    val shape: ProductShape
+    val shape: ProductShape,
+    val warrantyEndDateLabel: String? = null
 )
