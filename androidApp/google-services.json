@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "515529285970",
+    "project_id": "warranty-radar",
+    "storage_bucket": "warranty-radar.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:515529285970:android:5872d977dd12e68938da8b",
+        "android_client_info": {
+          "package_name": "com.example.warrantyradar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTZSUvriV6LrqK1nL5MZIEDJ5OESoSxJk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:515529285970:android:538722cd8bc0e4a538da8b",
+        "android_client_info": {
+          "package_name": "com.snekorgs.warrantyradar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTZSUvriV6LrqK1nL5MZIEDJ5OESoSxJk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
