@@ -41,7 +41,6 @@ import org.example.project.components.CategoryFilters
 import org.example.project.components.ProductArtwork
 import org.example.project.components.PurchaseLibrary
 import org.example.project.components.ReceiptPerforation
-import org.example.project.components.ScanReceiptButton
 import org.example.project.components.SearchField
 import org.example.project.components.WarrantyRing
 import org.example.project.components.categoriesFor
@@ -56,7 +55,7 @@ import org.example.project.model.Warranty
 import org.example.project.theme.AppTheme
 
 @Composable
-fun HomeScreen(warranties: List<Warranty>, onScanReceipt: () -> Unit) {
+fun HomeScreen(warranties: List<Warranty>) {
     var query by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(ALL_CATEGORIES) }
 
@@ -90,11 +89,6 @@ fun HomeScreen(warranties: List<Warranty>, onScanReceipt: () -> Unit) {
             )
         }
         item { PurchaseLibrary(filtered) }
-        item {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ScanReceiptButton(onClick = onScanReceipt)
-            }
-        }
     }
 }
 

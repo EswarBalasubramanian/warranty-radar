@@ -97,33 +97,6 @@ fun BellIcon(color: Color, modifier: Modifier = Modifier.size(18.dp)) {
 }
 
 @Composable
-fun ScanIcon(color: Color, modifier: Modifier = Modifier.size(18.dp)) {
-    Canvas(modifier) {
-        val strokeWidth = 1.7.dp.toPx()
-        val w = size.width
-        val h = size.height
-        val corner = w * 0.26f
-        val inset = 1.dp.toPx()
-        val corners = Path().apply {
-            moveTo(inset, inset + corner)
-            lineTo(inset, inset)
-            lineTo(inset + corner, inset)
-            moveTo(w - inset - corner, inset)
-            lineTo(w - inset, inset)
-            lineTo(w - inset, inset + corner)
-            moveTo(w - inset, h - inset - corner)
-            lineTo(w - inset, h - inset)
-            lineTo(w - inset - corner, h - inset)
-            moveTo(inset + corner, h - inset)
-            lineTo(inset, h - inset)
-            lineTo(inset, h - inset - corner)
-        }
-        drawPath(corners, color, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
-        drawLine(color, Offset(w * 0.24f, h * 0.5f), Offset(w * 0.76f, h * 0.5f), strokeWidth = strokeWidth, cap = StrokeCap.Round)
-    }
-}
-
-@Composable
 fun ProductArtwork(shape: ProductShape, color: Color, iconSize: Dp = 74.dp) {
     Canvas(modifier = Modifier.size(iconSize)) {
         val stroke = Stroke(width = 2.dp.toPx())

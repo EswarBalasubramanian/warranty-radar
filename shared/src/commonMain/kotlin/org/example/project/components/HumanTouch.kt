@@ -10,7 +10,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -32,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -40,9 +38,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -164,33 +160,6 @@ fun WarrantyRing(
             size = arcSize,
             style = Stroke(strokePx, cap = StrokeCap.Round)
         )
-    }
-}
-
-@Composable
-fun ScanReceiptButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = AppTheme.colors
-    val haptic = LocalHapticFeedback.current
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = colors.ink,
-        shadowElevation = 6.dp,
-        modifier = modifier
-            .pressBounce(0.94f)
-            .clip(RoundedCornerShape(50))
-            .clickable {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onClick()
-            }
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 22.dp, vertical = 13.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ScanIcon(colors.paper)
-            Spacer(Modifier.width(9.dp))
-            Text("Scan a receipt", color = colors.paper, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-        }
     }
 }
 
