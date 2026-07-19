@@ -185,7 +185,7 @@ fun SavedCelebration(visible: Boolean, modifier: Modifier = Modifier) {
             ) {
                 Text("✓", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.width(8.dp))
-                Text("Saved — you're covered", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                Text("Saved — you're covered", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
             }
         }
     }

@@ -190,7 +190,7 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
-                        Text("OR", color = colors.mutedInk, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                        Text("OR", color = colors.mutedInk, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                         Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
                     }
                 }
@@ -299,7 +299,7 @@ private fun CoverageSection(
         Text(
             "Warranties, replacement windows, returns, service plans — anything with a deadline. Scans fill this in automatically.",
             color = colors.mutedInk,
-            fontSize = 12.sp,
+            fontSize = 13.sp,
             lineHeight = 17.sp
         )
         Spacer(Modifier.height(10.dp))
@@ -312,7 +312,7 @@ private fun CoverageSection(
                 Text(
                     "Nothing here yet — scan the receipt or add the cover yourself.",
                     color = colors.mutedInk,
-                    fontSize = 12.sp,
+                    fontSize = 13.sp,
                     modifier = Modifier.padding(14.dp)
                 )
             }
@@ -332,7 +332,7 @@ private fun CoverageSection(
             Text(
                 "＋ Add coverage",
                 color = colors.accent,
-                fontSize = 12.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
             )
@@ -365,20 +365,20 @@ private fun PolicyDraftCard(draft: PolicyDraft, purchaseEpochDay: Int?, onRemove
                     Text(
                         kindLabel(draft.kind),
                         color = colors.ink,
-                        fontSize = 10.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 }
                 if (draft.fromScan) {
                     Spacer(Modifier.width(6.dp))
-                    Text("from scan", color = colors.accent, fontSize = 10.sp, fontWeight = FontWeight.Medium)
+                    Text("from scan", color = colors.accent, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 }
                 Spacer(Modifier.weight(1f))
                 Text(
                     "Remove",
                     color = colors.mutedInk,
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable(onClick = onRemove).padding(4.dp)
                 )
@@ -389,12 +389,12 @@ private fun PolicyDraftCard(draft: PolicyDraft, purchaseEpochDay: Int?, onRemove
             Text(
                 if (draft.provider != null) "$deadlineText · via ${draft.provider}" else deadlineText,
                 color = colors.mutedInk,
-                fontSize = 12.sp,
+                fontSize = 13.sp,
                 lineHeight = 16.sp
             )
             if (hint != null) {
                 Spacer(Modifier.height(5.dp))
-                Text(hint, color = colors.amber, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                Text(hint, color = colors.amber, fontSize = 13.sp, fontWeight = FontWeight.Medium)
             }
         }
     }
@@ -437,7 +437,7 @@ private fun PolicyEditor(onAdd: (PolicyDraft) -> Unit, onCancel: () -> Unit) {
             Text("Add coverage", color = colors.ink, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(12.dp))
 
-            Text("What kind is it?", color = colors.mutedInk, fontSize = 12.sp)
+            Text("What kind is it?", color = colors.mutedInk, fontSize = 13.sp)
             Spacer(Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -459,7 +459,7 @@ private fun PolicyEditor(onAdd: (PolicyDraft) -> Unit, onCancel: () -> Unit) {
             )
             Spacer(Modifier.height(14.dp))
 
-            Text("How long does it last?", color = colors.mutedInk, fontSize = 12.sp)
+            Text("How long does it last?", color = colors.mutedInk, fontSize = 13.sp)
             Spacer(Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -473,7 +473,7 @@ private fun PolicyEditor(onAdd: (PolicyDraft) -> Unit, onCancel: () -> Unit) {
             }
             Spacer(Modifier.height(14.dp))
 
-            Text("Or an exact end date", color = colors.mutedInk, fontSize = 12.sp)
+            Text("Or an exact end date", color = colors.mutedInk, fontSize = 13.sp)
             Spacer(Modifier.height(8.dp))
             Surface(
                 modifier = Modifier
@@ -496,7 +496,7 @@ private fun PolicyEditor(onAdd: (PolicyDraft) -> Unit, onCancel: () -> Unit) {
                         Text(
                             "Clear",
                             color = colors.accent,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.clickable(onClick = { endEpochDay = null })
                         )
@@ -558,7 +558,7 @@ private fun DateField(label: String, dateLabel: String?, placeholder: String, on
                     modifier = Modifier.weight(1f)
                 )
                 if (onClear != null) {
-                    Text("Clear", color = colors.accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = onClear))
+                    Text("Clear", color = colors.accent, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = onClear))
                     Spacer(Modifier.width(12.dp))
                 }
                 NavigationGlyph(NavigationIcon.Calendar, colors.mutedInk)
@@ -611,22 +611,22 @@ private fun ReceiptUpload(
         Text(
             "We'll read the text and pull out warranty, replacement and return details. Scan as many photos as you need — we'll merge them.",
             color = colors.mutedInk,
-            fontSize = 13.sp,
+            fontSize = 14.sp,
             textAlign = TextAlign.Center,
             lineHeight = 18.sp
         )
         Spacer(Modifier.height(14.dp))
-        Text("JPG, PNG or PDF · up to 10 MB", color = colors.accent, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+        Text("JPG, PNG or PDF · up to 10 MB", color = colors.accent, fontSize = 13.sp, fontWeight = FontWeight.Medium)
         Spacer(Modifier.height(16.dp))
 
         when (status) {
             is ScanStatus.Processing -> {
                 CircularProgressIndicator(color = colors.accent, modifier = Modifier.size(28.dp))
                 Spacer(Modifier.height(8.dp))
-                Text("Reading receipt…", color = colors.mutedInk, fontSize = 12.sp)
+                Text("Reading receipt…", color = colors.mutedInk, fontSize = 13.sp)
             }
             is ScanStatus.Error -> {
-                Text(status.message, color = colors.alert, fontSize = 12.sp, textAlign = TextAlign.Center)
+                Text(status.message, color = colors.alert, fontSize = 13.sp, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(12.dp))
                 UploadActions(onTakePhoto, onChoosePhoto, onChoosePdf)
             }
@@ -635,7 +635,7 @@ private fun ReceiptUpload(
                     Text(
                         scannedSummary,
                         color = colors.success,
-                        fontSize = 12.sp,
+                        fontSize = 13.sp,
                         textAlign = TextAlign.Center,
                         lineHeight = 16.sp
                     )
@@ -667,7 +667,7 @@ private fun UploadActionButton(label: String, onClick: () -> Unit) {
         Text(
             label,
             color = colors.accent,
-            fontSize = 12.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
         )

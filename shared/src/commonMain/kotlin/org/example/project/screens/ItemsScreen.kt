@@ -3,7 +3,7 @@ package org.example.project.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +36,7 @@ fun ItemsScreen(warranties: List<Warranty>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .safeContentPadding(),
+            .safeDrawingPadding(),
         contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
