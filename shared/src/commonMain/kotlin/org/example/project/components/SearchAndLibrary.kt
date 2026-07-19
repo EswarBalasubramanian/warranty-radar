@@ -49,11 +49,11 @@ fun SearchField(query: String, onQueryChange: (String) -> Unit) {
                 onValueChange = onQueryChange,
                 modifier = Modifier.weight(1f),
                 singleLine = true,
-                textStyle = TextStyle(color = colors.ink, fontSize = 13.sp),
+                textStyle = TextStyle(color = colors.ink, fontSize = 14.sp),
                 cursorBrush = SolidColor(colors.primary),
                 decorationBox = { inner ->
                     if (query.isEmpty()) {
-                        Text("Search purchases, stores or receipts", color = colors.mutedInk, fontSize = 13.sp)
+                        Text("Search purchases, stores or receipts", color = colors.mutedInk, fontSize = 14.sp)
                     }
                     inner()
                 }
@@ -87,7 +87,7 @@ fun PurchaseLibrary(warranties: List<Warranty>, title: String = "Your purchases"
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(title, color = colors.ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-            Text("${warranties.size} items", color = colors.mutedInk, fontSize = 12.sp)
+            Text("${warranties.size} items", color = colors.mutedInk, fontSize = 13.sp)
         }
         if (warranties.isEmpty()) {
             Surface(
@@ -98,7 +98,7 @@ fun PurchaseLibrary(warranties: List<Warranty>, title: String = "Your purchases"
                 Text(
                     "Nothing here yet. Try another search — or scan a receipt and we'll keep it safe.",
                     color = colors.mutedInk,
-                    fontSize = 12.sp,
+                    fontSize = 13.sp,
                     modifier = Modifier.padding(18.dp)
                 )
             }

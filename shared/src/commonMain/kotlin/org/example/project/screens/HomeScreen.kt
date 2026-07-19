@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -81,7 +81,7 @@ fun HomeScreen(warranties: List<Warranty>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .safeContentPadding(),
+            .safeDrawingPadding(),
         contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
@@ -121,7 +121,7 @@ private fun LibraryHeader(subtitle: String) {
                 fontFamily = FontFamily.Serif
             )
             Spacer(Modifier.height(3.dp))
-            Text(subtitle, color = colors.mutedInk, fontSize = 12.sp)
+            Text(subtitle, color = colors.mutedInk, fontSize = 13.sp)
         }
         Box(
             modifier = Modifier
@@ -130,7 +130,7 @@ private fun LibraryHeader(subtitle: String) {
                 .background(colors.butter),
             contentAlignment = Alignment.Center
         ) {
-            Text("NG", color = colors.amber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text("NG", color = colors.amber, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -169,7 +169,7 @@ private fun HeroCard(warranty: Warranty) {
                         overflow = TextOverflow.Ellipsis
                     )
                     Spacer(Modifier.height(3.dp))
-                    Text(heroStatusLine(days), color = ringColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Text(heroStatusLine(days), color = ringColor, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 }
             }
             Spacer(Modifier.height(14.dp))
@@ -179,13 +179,13 @@ private fun HeroCard(warranty: Warranty) {
                 Text(
                     "${warranty.store} · ${warranty.purchaseDateLabel}",
                     color = colors.mutedInk,
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
                 if (warranty.price != null) {
-                    Text(formatCurrency(warranty.price), color = colors.ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text(formatCurrency(warranty.price), color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
             if (warranty.policies.isNotEmpty()) {
@@ -207,7 +207,7 @@ private fun HeroCard(warranty: Warranty) {
                             Text(
                                 "${kindLabel(policy.kind)} · $detail",
                                 color = colors.ink,
-                                fontSize = 10.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
                                 maxLines = 1,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
@@ -242,7 +242,7 @@ private fun AttentionBanner(items: List<Warranty>) {
                 Text(
                     "Your ${urgent.productName}'s $noun ${endsPhrase(days)}. Worth a quick look?",
                     color = colors.ink,
-                    fontSize = 12.sp,
+                    fontSize = 13.sp,
                     lineHeight = 17.sp
                 )
                 if (items.size > 1) {
@@ -250,7 +250,7 @@ private fun AttentionBanner(items: List<Warranty>) {
                     Text(
                         if (items.size == 2) "…and 1 more to check" else "…and ${items.size - 1} more to check",
                         color = colors.mutedInk,
-                        fontSize = 11.sp
+                        fontSize = 13.sp
                     )
                 }
             }
