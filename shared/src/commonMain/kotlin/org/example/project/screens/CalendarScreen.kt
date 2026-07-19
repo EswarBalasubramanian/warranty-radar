@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -37,14 +37,14 @@ fun CalendarScreen(warranties: List<Warranty>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .safeContentPadding(),
+            .safeDrawingPadding(),
         contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         item {
             Column {
                 Text("Calendar", color = colors.ink, fontSize = 23.sp, fontWeight = FontWeight.SemiBold)
-                Text("We'll nudge you before anything runs out", color = colors.mutedInk, fontSize = 12.sp)
+                Text("We'll nudge you before anything runs out", color = colors.mutedInk, fontSize = 13.sp)
             }
         }
         if (thisWeek.isNotEmpty()) item { DeadlineSection("This week", thisWeek) }
@@ -57,7 +57,7 @@ fun CalendarScreen(warranties: List<Warranty>) {
                     Text(
                         "Nothing to watch yet — scan a receipt and we'll keep an eye on the dates for you.",
                         color = colors.mutedInk,
-                        fontSize = 12.sp,
+                        fontSize = 13.sp,
                         modifier = Modifier.padding(18.dp)
                     )
                 }

@@ -58,9 +58,9 @@ fun MetricTile(modifier: Modifier, value: String, label: String, detail: String,
         Column(modifier = Modifier.padding(13.dp)) {
             Text(value, color = colors.ink, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(3.dp))
-            Text(label, color = colors.mutedInk, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(label, color = colors.mutedInk, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(8.dp))
-            Text(detail, color = accent, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+            Text(detail, color = accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -79,7 +79,7 @@ fun FilterPill(label: String, selected: Boolean, onClick: () -> Unit) {
         Text(
             text = label,
             color = if (selected) colors.paper else colors.ink,
-            fontSize = 12.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(horizontal = 15.dp, vertical = 9.dp)
         )
@@ -109,9 +109,9 @@ fun ReviewItem(title: String, subtitle: String, time: String, accent: Color, pro
         Column(modifier = Modifier.weight(1f)) {
             Text(title, color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(2.dp))
-            Text(subtitle, color = colors.mutedInk, fontSize = 11.sp)
+            Text(subtitle, color = colors.mutedInk, fontSize = 13.sp)
         }
-        Text(time, color = accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text(time, color = accent, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -143,9 +143,9 @@ fun ProductTile(warranty: Warranty) {
             Spacer(Modifier.height(10.dp))
             Text(warranty.productName, color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(2.dp))
-            Text(warranty.store, color = colors.mutedInk, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(warranty.store, color = colors.mutedInk, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(7.dp))
-            Text(statusLabel, color = statusColor, fontSize = 11.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(statusLabel, color = statusColor, fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

@@ -136,7 +136,7 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
-                        Text("OR", color = colors.mutedInk, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                        Text("OR", color = colors.mutedInk, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                         Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
                     }
                 }
@@ -226,7 +226,7 @@ private fun DateField(label: String, dateLabel: String?, onClick: () -> Unit, on
                     modifier = Modifier.weight(1f)
                 )
                 if (onClear != null) {
-                    Text("Clear", color = colors.accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = onClear))
+                    Text("Clear", color = colors.accent, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = onClear))
                     Spacer(Modifier.width(12.dp))
                 }
                 NavigationGlyph(NavigationIcon.Calendar, colors.mutedInk)
@@ -253,19 +253,19 @@ private fun ReceiptUpload(status: ScanStatus, onTakePhoto: () -> Unit, onChooseP
         Spacer(Modifier.height(12.dp))
         Text("Scan a receipt", color = colors.ink, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(4.dp))
-        Text("We'll read the text and fill in what we can", color = colors.mutedInk, fontSize = 13.sp, textAlign = TextAlign.Center)
+        Text("We'll read the text and fill in what we can", color = colors.mutedInk, fontSize = 14.sp, textAlign = TextAlign.Center)
         Spacer(Modifier.height(14.dp))
-        Text("JPG, PNG or PDF · up to 10 MB", color = colors.accent, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+        Text("JPG, PNG or PDF · up to 10 MB", color = colors.accent, fontSize = 13.sp, fontWeight = FontWeight.Medium)
         Spacer(Modifier.height(16.dp))
 
         when (status) {
             is ScanStatus.Processing -> {
                 CircularProgressIndicator(color = colors.accent, modifier = Modifier.size(28.dp))
                 Spacer(Modifier.height(8.dp))
-                Text("Reading receipt…", color = colors.mutedInk, fontSize = 12.sp)
+                Text("Reading receipt…", color = colors.mutedInk, fontSize = 13.sp)
             }
             is ScanStatus.Error -> {
-                Text(status.message, color = colors.alert, fontSize = 12.sp, textAlign = TextAlign.Center)
+                Text(status.message, color = colors.alert, fontSize = 13.sp, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(12.dp))
                 UploadActions(onTakePhoto, onChoosePhoto, onChoosePdf)
             }
@@ -296,7 +296,7 @@ private fun UploadActionButton(label: String, onClick: () -> Unit) {
         Text(
             label,
             color = colors.accent,
-            fontSize = 12.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
         )

@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,7 +39,7 @@ fun ProfileScreen(warranties: List<Warranty>, themeMode: ThemeMode, onThemeModeC
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .safeContentPadding(),
+            .safeDrawingPadding(),
         contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
@@ -65,7 +65,7 @@ private fun ProfileHeader() {
         Spacer(Modifier.width(12.dp))
         Column {
             Text("Naveen Gunasekaran", color = colors.ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-            Text("Keeping every purchase covered", color = colors.mutedInk, fontSize = 12.sp)
+            Text("Keeping every purchase covered", color = colors.mutedInk, fontSize = 13.sp)
         }
     }
 }
@@ -95,8 +95,8 @@ private fun StatsCard(warranties: List<Warranty>) {
 private fun ProfileStatRow(label: String, value: String) {
     val colors = AppTheme.colors
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-        Text(label, color = colors.mutedInk, fontSize = 13.sp, modifier = Modifier.weight(1f))
-        Text(value, color = colors.ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        Text(label, color = colors.mutedInk, fontSize = 14.sp, modifier = Modifier.weight(1f))
+        Text(value, color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -112,7 +112,7 @@ private fun AppearanceCard(themeMode: ThemeMode, onThemeModeChange: (ThemeMode) 
         Column(modifier = Modifier.padding(18.dp)) {
             Text("Appearance", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(4.dp))
-            Text("Choose how Warranty Radar looks on this device", color = colors.mutedInk, fontSize = 12.sp)
+            Text("Choose how Warranty Radar looks on this device", color = colors.mutedInk, fontSize = 13.sp)
             Spacer(Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ThemeMode.entries.forEach { mode ->
@@ -143,7 +143,7 @@ private fun ThemeOptionPill(label: String, selected: Boolean, onClick: () -> Uni
         Text(
             label,
             color = if (selected) colors.paper else colors.ink,
-            fontSize = 12.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
