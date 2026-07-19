@@ -11,6 +11,22 @@ CREATE TABLE warrantyEntity (
     warrantyEndDateLabel TEXT
 );
 
+-- One row per warranty / replacement / return / service promise. kind and source
+-- are stored as free TEXT and parsed leniently, so future policy types need no
+-- schema change — unknown kinds surface as "Other" with the wording preserved.
+CREATE TABLE policyEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    warrantyId TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    title TEXT NOT NULL,
+    provider TEXT,
+    durationDays INTEGER,
+    endEpochDay INTEGER,
+    endDateLabel TEXT,
+    notes TEXT,
+    source TEXT NOT NULL
+);
+
 selectAll:
 SELECT * FROM warrantyEntity;
 
@@ -19,4 +35,11 @@ SELECT COUNT(*) FROM warrantyEntity;
 
 insertWarranty:
 INSERT INTO warrantyEntity(id, productName, store, category, purchaseDateLabel, warrantyStatusLabel, urgencyDays, price, shape, warrantyEndDateLabel)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+selectAllPolicies:
+SELECT * FROM policyEntity;
+
+insertPolicy:
+INSERT INTO policyEntity(id, warrantyId, kind, title, provider, durationDays, endEpochDay, endDateLabel, notes, source)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);

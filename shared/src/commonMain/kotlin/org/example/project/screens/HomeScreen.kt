@@ -1,6 +1,7 @@
 package org.example.project.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -48,10 +50,18 @@ import org.example.project.components.coverageSubtitle
 import org.example.project.components.endsPhrase
 import org.example.project.components.filterWarranties
 import org.example.project.components.formatCurrency
+import org.example.project.components.friendlyTimeLeft
 import org.example.project.components.greetingFor
 import org.example.project.components.heroStatusLine
+import org.example.project.components.policyKindColor
 import org.example.project.components.urgencyColor
 import org.example.project.model.Warranty
+import org.example.project.model.daysLeft
+import org.example.project.model.durationLabel
+import org.example.project.model.kindLabel
+import org.example.project.model.kindNoun
+import org.example.project.model.nearestPolicyDeadline
+import org.example.project.model.todayEpochDay
 import org.example.project.theme.AppTheme
 
 @Composable
@@ -61,7 +71,9 @@ fun HomeScreen(warranties: List<Warranty>) {
 
     val categories = remember(warranties) { categoriesFor(warranties) }
     val filtered = remember(warranties, query, selectedCategory) { filterWarranties(warranties, query, selectedCategory) }
-    val attentionItems = remember(warranties) { warranties.filter { it.urgencyDays != null }.sortedBy { it.urgencyDays } }
+    val attentionItems = remember(warranties) {
+        warranties.filter { (it.urgencyDays ?: Int.MAX_VALUE) <= 30 }.sortedBy { it.urgencyDays }
+    }
     val heroItem = remember(warranties) {
         warranties.maxByOrNull { it.urgencyDays ?: Int.MAX_VALUE }
     }
@@ -176,6 +188,34 @@ private fun HeroCard(warranty: Warranty) {
                     Text(formatCurrency(warranty.price), color = colors.ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
+            if (warranty.policies.isNotEmpty()) {
+                Spacer(Modifier.height(11.dp))
+                val today = remember { todayEpochDay() }
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    warranty.policies.forEach { policy ->
+                        val left = policy.daysLeft(today)
+                        val detail = when {
+                            left != null && left >= 0 -> friendlyTimeLeft(left)
+                            left != null -> "ended"
+                            policy.durationDays != null -> durationLabel(policy.durationDays)
+                            else -> "no deadline"
+                        }
+                        Surface(shape = RoundedCornerShape(50), color = policyKindColor(policy.kind, colors)) {
+                            Text(
+                                "${kindLabel(policy.kind)} · $detail",
+                                color = colors.ink,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -185,6 +225,8 @@ private fun AttentionBanner(items: List<Warranty>) {
     val colors = AppTheme.colors
     val urgent = items.first()
     val days = urgent.urgencyDays ?: 0
+    val today = remember { todayEpochDay() }
+    val noun = nearestPolicyDeadline(urgent.policies, today)?.first?.kind?.let { kindNoun(it) } ?: "warranty"
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -198,7 +240,7 @@ private fun AttentionBanner(items: List<Warranty>) {
             Spacer(Modifier.width(11.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Your ${urgent.productName}'s warranty ${endsPhrase(days)}. Worth a quick look?",
+                    "Your ${urgent.productName}'s $noun ${endsPhrase(days)}. Worth a quick look?",
                     color = colors.ink,
                     fontSize = 12.sp,
                     lineHeight = 17.sp

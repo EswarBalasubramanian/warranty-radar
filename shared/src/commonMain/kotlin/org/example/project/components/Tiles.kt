@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.example.project.model.PolicyKind
 import org.example.project.model.ProductShape
 import org.example.project.model.Warranty
 import org.example.project.theme.AppColorScheme
@@ -35,6 +36,17 @@ fun urgencyColor(days: Int, colors: AppColorScheme): Color = when {
     days <= 3 -> colors.alert
     days <= 14 -> colors.amber
     else -> colors.success
+}
+
+fun policyKindColor(kind: PolicyKind, colors: AppColorScheme): Color = when (kind) {
+    PolicyKind.Warranty -> colors.softMint
+    PolicyKind.Replacement -> colors.softLilac
+    PolicyKind.Return -> colors.butter
+    PolicyKind.Service -> colors.mist
+    PolicyKind.Repair -> colors.blush
+    PolicyKind.Support -> colors.softPrimary
+    PolicyKind.Protection -> colors.softPrimary
+    PolicyKind.Other -> colors.secondaryButtonBackground
 }
 
 fun tileColorFor(shape: ProductShape, colors: AppColorScheme): Color = when (shape) {
