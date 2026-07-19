@@ -88,25 +88,50 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
     var store by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var priceText by remember { mutableStateOf("") }
-    var purchaseDateLabel by remember { mutableStateOf("") }
+    var purchaseEpochDay by remember { mutableStateOf<Int?>(null) }
+    var purchaseDateRawGuess by remember { mutableStateOf<String?>(null) }
+    var showPurchaseDatePicker by remember { mutableStateOf(false) }
     val policyDrafts = remember { mutableStateListOf<PolicyDraft>() }
     var scansCount by remember { mutableStateOf(0) }
     var showPolicyEditor by remember { mutableStateOf(false) }
     val canSave = productName.isNotBlank()
 
-    val purchaseEpochDay = remember(purchaseDateLabel) {
-        parseFlexibleDateLabel(purchaseDateLabel)?.toEpochDays()
-    }
+    val purchaseDateLabel = purchaseEpochDay?.let { formatEpochDayLabel(it) } ?: purchaseDateRawGuess.orEmpty()
 
     val scanner = rememberReceiptScannerController { scanned ->
         if (store.isBlank()) scanned.guessedStore?.let { store = it }
         if (priceText.isBlank()) scanned.guessedPrice?.let { priceText = it.toString() }
-        if (purchaseDateLabel.isBlank()) scanned.guessedPurchaseDateLabel?.let { purchaseDateLabel = it }
+        if (purchaseEpochDay == null && purchaseDateRawGuess == null) {
+            scanned.guessedPurchaseDateLabel?.let { guess ->
+                val parsed = parseFlexibleDateLabel(guess)?.toEpochDays()
+                if (parsed != null) purchaseEpochDay = parsed else purchaseDateRawGuess = guess
+            }
+        }
         val merged = mergePolicyDrafts(policyDrafts.toList(), scanned.guessedPolicies)
         policyDrafts.clear()
         policyDrafts.addAll(merged)
         receiptText = if (receiptText.isBlank()) scanned.rawText else receiptText + "\n\n" + scanned.rawText
         scansCount += 1
+    }
+
+    if (showPurchaseDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = purchaseEpochDay?.let { it.toLong() * 24 * 60 * 60 * 1000 }
+        )
+        DatePickerDialog(
+            onDismissRequest = { showPurchaseDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { purchaseEpochDay = epochDayFromMillis(it) }
+                    showPurchaseDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPurchaseDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
     }
 
     Surface(modifier = Modifier.fillMaxSize(), color = colors.screenSurface) {
@@ -123,7 +148,17 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
                 item { LabeledField("Store", store, { store = it }, "e.g. Currys") }
                 item { LabeledField("Category", category, { category = it }, "e.g. Tech") }
                 item { LabeledField("Price", priceText, { priceText = it }, "e.g. 349.00") }
-                item { LabeledField("Purchase date", purchaseDateLabel, { purchaseDateLabel = it }, "e.g. 18 Jul 2026") }
+                item {
+                    DateField(
+                        label = "Purchase date",
+                        dateLabel = purchaseDateLabel.ifBlank { null },
+                        placeholder = "e.g. 18 Jul 2026",
+                        onClick = { showPurchaseDatePicker = true },
+                        onClear = if (purchaseEpochDay != null || purchaseDateRawGuess != null) {
+                            { purchaseEpochDay = null; purchaseDateRawGuess = null }
+                        } else null
+                    )
+                }
                 item {
                     CoverageSection(
                         drafts = policyDrafts,
@@ -494,6 +529,39 @@ private fun PolicyEditor(onAdd: (PolicyDraft) -> Unit, onCancel: () -> Unit) {
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.paper, contentColor = colors.ink)
                 ) { Text("Cancel", fontWeight = FontWeight.SemiBold) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DateField(label: String, dateLabel: String?, placeholder: String, onClick: () -> Unit, onClear: (() -> Unit)?) {
+    val colors = AppTheme.colors
+    Column {
+        Text(label, color = colors.ink, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(8.dp))
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, colors.border, RoundedCornerShape(14.dp))
+                .clickable(onClick = onClick),
+            shape = RoundedCornerShape(14.dp),
+            color = colors.paper
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    dateLabel ?: placeholder,
+                    color = if (dateLabel != null) colors.ink else colors.mutedInk,
+                    modifier = Modifier.weight(1f)
+                )
+                if (onClear != null) {
+                    Text("Clear", color = colors.accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = onClear))
+                    Spacer(Modifier.width(12.dp))
+                }
+                NavigationGlyph(NavigationIcon.Calendar, colors.mutedInk)
             }
         }
     }
