@@ -107,7 +107,7 @@ fun HomeScreen(warranties: List<Warranty>) {
 @Composable
 private fun LibraryHeader(subtitle: String) {
     val colors = AppTheme.colors
-    val hour = remember { Clock.systemDefaultZone().now().toLocalDateTime(TimeZone.currentSystemDefault()).hour }
+    val hour = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour }
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically

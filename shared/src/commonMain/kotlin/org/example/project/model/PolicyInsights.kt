@@ -11,7 +11,7 @@ private val monthNames = listOf(
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 )
 
-fun todayEpochDay(): Int = Clock.systemDefaultZone().todayIn(TimeZone.currentSystemDefault()).toEpochDays()
+fun todayEpochDay(): Int = Clock.System.todayIn(TimeZone.currentSystemDefault()).toEpochDays()
 
 fun epochDayFromMillis(epochMillis: Long): Int =
     Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(TimeZone.UTC).date.toEpochDays()
