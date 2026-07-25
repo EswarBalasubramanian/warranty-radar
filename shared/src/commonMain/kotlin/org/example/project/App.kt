@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -139,7 +140,7 @@ private fun AppScaffold(
 ) {
     val colors = AppTheme.colors
     Box(modifier = Modifier.fillMaxSize().background(colors.screenSurface)) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
             Box(modifier = Modifier.weight(1f), content = content)
             BottomNavigation(current = current, onNavigate = onNavigate, onAddReceipt = onAddReceipt)
         }
