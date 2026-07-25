@@ -173,6 +173,22 @@ fun PasteReceiptScreen(
             Spacer(Modifier.height(24.dp))
 
             LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                item {
+                    ReceiptUpload(
+                        status = scanner.status,
+                        scannedSummary = scanSummary(scansCount, policyDrafts.count { it.fromScan }),
+                        onTakePhoto = scanner.captureFromCamera,
+                        onChoosePhoto = scanner.pickFromGallery,
+                        onChoosePdf = scanner.pickPdf
+                    )
+                }
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
+                        Text("OR", color = colors.mutedInk, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
+                    }
+                }
                 item { LabeledField("Product name", productName, { productName = it }, "e.g. Sony WH-1000XM5") }
                 item { LabeledField("Store", store, { store = it }, "e.g. Currys") }
                 item {
@@ -233,22 +249,6 @@ fun PasteReceiptScreen(
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(value = receiptText, onValueChange = { receiptText = it }, modifier = Modifier.fillMaxWidth().height(100.dp), placeholder = { Text("Paste any other receipt details here…") }, shape = RoundedCornerShape(14.dp))
                     }
-                }
-                item {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
-                        Text("OR", color = colors.mutedInk, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                        Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
-                    }
-                }
-                item {
-                    ReceiptUpload(
-                        status = scanner.status,
-                        scannedSummary = scanSummary(scansCount, policyDrafts.count { it.fromScan }),
-                        onTakePhoto = scanner.captureFromCamera,
-                        onChoosePhoto = scanner.pickFromGallery,
-                        onChoosePdf = scanner.pickPdf
-                    )
                 }
             }
 
