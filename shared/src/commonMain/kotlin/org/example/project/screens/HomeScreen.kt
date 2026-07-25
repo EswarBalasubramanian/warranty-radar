@@ -1,6 +1,7 @@
 package org.example.project.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -142,10 +143,9 @@ private fun HeroCard(warranty: Warranty) {
     val fraction = if (days != null) (days / 365f).coerceIn(0.08f, 1f) else 1f
     val ringColor = if (days != null) urgencyColor(days, colors) else colors.success
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        color = colors.glass,
-        shadowElevation = 8.dp
+        modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        color = colors.glass
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

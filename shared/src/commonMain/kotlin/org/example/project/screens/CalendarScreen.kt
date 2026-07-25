@@ -62,7 +62,7 @@ fun CalendarScreen(warranties: List<Warranty>) {
         if (noDeadline.isNotEmpty()) item { NoDeadlineSection(noDeadline) }
         if (warranties.isEmpty()) {
             item {
-                Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), color = colors.glass) {
+                Surface(modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(16.dp)), shape = RoundedCornerShape(16.dp), color = colors.glass) {
                     Text(
                         "Nothing to watch yet — scan a receipt and we'll keep an eye on the dates for you.",
                         color = colors.mutedInk,
@@ -83,10 +83,9 @@ private fun DeadlineSection(title: String, entries: List<PolicyDeadline>) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, colors.border, RoundedCornerShape(22.dp)),
-            shape = RoundedCornerShape(22.dp),
-            color = colors.glass,
-            shadowElevation = 5.dp
+                .border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
+            shape = RoundedCornerShape(16.dp),
+            color = colors.glass
         ) {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 entries.forEachIndexed { index, entry ->
@@ -117,10 +116,9 @@ private fun RecentlyEndedSection(entries: List<PolicyDeadline>) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, colors.border, RoundedCornerShape(22.dp)),
-            shape = RoundedCornerShape(22.dp),
-            color = colors.glass,
-            shadowElevation = 5.dp
+                .border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
+            shape = RoundedCornerShape(16.dp),
+            color = colors.glass
         ) {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 entries.forEachIndexed { index, entry ->
@@ -148,10 +146,9 @@ private fun NoDeadlineSection(items: List<Warranty>) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, colors.border, RoundedCornerShape(22.dp)),
-            shape = RoundedCornerShape(22.dp),
-            color = colors.glass,
-            shadowElevation = 5.dp
+                .border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
+            shape = RoundedCornerShape(16.dp),
+            color = colors.glass
         ) {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 items.forEachIndexed { index, warranty ->

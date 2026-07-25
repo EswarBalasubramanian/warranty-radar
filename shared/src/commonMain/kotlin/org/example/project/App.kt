@@ -92,7 +92,7 @@ private fun AppScaffold(
     content: @Composable BoxScope.() -> Unit
 ) {
     val colors = AppTheme.colors
-    Box(modifier = Modifier.fillMaxSize().background(colors.backdrop)) {
+    Box(modifier = Modifier.fillMaxSize().background(colors.screenSurface)) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.weight(1f), content = content)
             BottomNavigation(current = current, onNavigate = onNavigate, onAddReceipt = onAddReceipt)

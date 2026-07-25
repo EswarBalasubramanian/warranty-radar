@@ -1,6 +1,7 @@
 package org.example.project.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -76,10 +77,9 @@ private fun StatsCard(warranties: List<Warranty>) {
     val totalValue = warranties.sumOf { it.price ?: 0.0 }
     val storeCount = warranties.map { it.store }.distinct().size
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = colors.glass,
-        shadowElevation = 6.dp
+        modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        color = colors.glass
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Text("Your library at a glance", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
@@ -104,10 +104,9 @@ private fun ProfileStatRow(label: String, value: String) {
 private fun AppearanceCard(themeMode: ThemeMode, onThemeModeChange: (ThemeMode) -> Unit) {
     val colors = AppTheme.colors
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = colors.glass,
-        shadowElevation = 6.dp
+        modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        color = colors.glass
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Text("Appearance", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)

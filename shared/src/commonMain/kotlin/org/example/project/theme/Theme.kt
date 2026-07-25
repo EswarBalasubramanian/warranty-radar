@@ -7,7 +7,6 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 enum class ThemeMode { System, Light, Dark }
@@ -29,7 +28,6 @@ data class AppColorScheme(
     val alert: Color,
     val amber: Color,
     val success: Color,
-    val backdrop: Brush,
     val screenSurface: Color,
     val accent: Color,
     val uploadBorder: Color,
@@ -55,7 +53,6 @@ val LightAppColors = AppColorScheme(
     alert = Color(0xFFEF6254),
     amber = Color(0xFF9B7422),
     success = Color(0xFF45AD78),
-    backdrop = Brush.linearGradient(colors = listOf(Color(0xFFF6DFC4), Color(0xFFFAF0DC), Color(0xFFE3EFE0))),
     screenSurface = Color(0xFFFBF7EF),
     accent = Color(0xFF0D766E),
     uploadBorder = Color(0xFF9BCFC9),
@@ -81,7 +78,6 @@ val DarkAppColors = AppColorScheme(
     alert = Color(0xFFFF6B5C),
     amber = Color(0xFFE0A83D),
     success = Color(0xFF5FD08A),
-    backdrop = Brush.linearGradient(colors = listOf(Color(0xFF2B2018), Color(0xFF241F16), Color(0xFF1B211A))),
     screenSurface = Color(0xFF171511),
     accent = Color(0xFF34B5A6),
     uploadBorder = Color(0xFF2E5C55),

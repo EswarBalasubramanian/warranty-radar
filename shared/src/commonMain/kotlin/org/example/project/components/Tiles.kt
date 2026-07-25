@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -133,22 +132,14 @@ fun ProductTile(warranty: Warranty) {
     val artworkColor = tileColorFor(warranty.shape, colors)
     val statusColor = if (warranty.urgencyDays != null) urgencyColor(warranty.urgencyDays, colors) else colors.success
     val statusLabel = if (warranty.urgencyDays != null) friendlyTimeLeft(warranty.urgencyDays) else warranty.warrantyStatusLabel
-    val seed = warranty.id.hashCode()
-    val tilt = (seed.mod(5) - 2) * 0.4f
-    val tileShape = if (seed.mod(2) == 0) {
-        RoundedCornerShape(topStart = 25.dp, topEnd = 19.dp, bottomEnd = 25.dp, bottomStart = 19.dp)
-    } else {
-        RoundedCornerShape(topStart = 19.dp, topEnd = 25.dp, bottomEnd = 19.dp, bottomStart = 25.dp)
-    }
+    val tileShape = RoundedCornerShape(16.dp)
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .graphicsLayer { rotationZ = tilt }
             .pressBounce(0.965f)
             .clip(tileShape),
         shape = tileShape,
-        color = artworkColor,
-        shadowElevation = 2.dp
+        color = artworkColor
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
             ProductArtwork(warranty.shape, colors.ink.copy(alpha = 0.78f), iconSize = 34.dp)

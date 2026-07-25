@@ -1,6 +1,7 @@
 package org.example.project.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -26,10 +27,9 @@ fun BottomNavigation(current: AppScreen, onNavigate: (AppScreen) -> Unit, onAddR
     val colors = AppTheme.colors
     Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 10.dp)) {
         Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(26.dp),
-            color = colors.glass,
-            shadowElevation = 10.dp
+            modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(20.dp)),
+            shape = RoundedCornerShape(20.dp),
+            color = colors.glass
         ) {
             Row(
                 modifier = Modifier

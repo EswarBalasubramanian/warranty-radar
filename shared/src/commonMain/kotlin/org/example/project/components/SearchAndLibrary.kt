@@ -1,5 +1,6 @@
 package org.example.project.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,15 +31,14 @@ import org.example.project.theme.AppTheme
 fun SearchField(query: String, onQueryChange: (String) -> Unit) {
     val colors = AppTheme.colors
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = colors.glass,
-        shadowElevation = 4.dp
+        modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(14.dp)),
+        shape = RoundedCornerShape(14.dp),
+        color = colors.glass
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .height(48.dp)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -91,8 +91,8 @@ fun PurchaseLibrary(warranties: List<Warranty>, title: String = "Your purchases"
         }
         if (warranties.isEmpty()) {
             Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(22.dp),
+                modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
+                shape = RoundedCornerShape(16.dp),
                 color = colors.glass
             ) {
                 Text(

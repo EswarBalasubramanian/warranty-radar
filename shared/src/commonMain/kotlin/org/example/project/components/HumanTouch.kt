@@ -10,9 +10,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,7 +36,6 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -111,16 +112,7 @@ fun Modifier.pressBounce(pressedScale: Float = 0.96f): Modifier = composed {
 
 @Composable
 fun ReceiptPerforation(modifier: Modifier = Modifier, color: Color = AppTheme.colors.divider) {
-    Canvas(modifier = modifier.fillMaxWidth().height(2.dp)) {
-        drawLine(
-            color = color,
-            start = Offset(0f, center.y),
-            end = Offset(size.width, center.y),
-            strokeWidth = size.height,
-            cap = StrokeCap.Round,
-            pathEffect = PathEffect.dashPathEffect(floatArrayOf(9f, 8f))
-        )
-    }
+    Box(modifier = modifier.fillMaxWidth().height(1.dp).background(color))
 }
 
 @Composable
@@ -178,7 +170,7 @@ fun SavedCelebration(visible: Boolean, modifier: Modifier = Modifier) {
         ),
         exit = fadeOut() + scaleOut(targetScale = 0.8f)
     ) {
-        Surface(shape = RoundedCornerShape(50), color = colors.success, shadowElevation = 8.dp) {
+        Surface(shape = RoundedCornerShape(50), color = colors.success) {
             Row(
                 modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
