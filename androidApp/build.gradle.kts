@@ -18,6 +18,7 @@ dependencies {
 
     implementation(libs.compose.uiToolingPreview)
     debugImplementation(libs.compose.uiTooling)
+    implementation(libs.androidx.work.runtime)
 
     implementation(platform("com.google.firebase:firebase-bom:34.16.0"))
 }
