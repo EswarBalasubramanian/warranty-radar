@@ -35,11 +35,11 @@ import org.example.project.theme.WarrantyRadarTheme
 enum class AppScreen { Home, Items, Calendar, Profile, PasteReceipt }
 
 @Composable
-fun App(driverFactory: DatabaseDriverFactory) {
+fun App(driverFactory: DatabaseDriverFactory, startScreen: AppScreen = AppScreen.Home) {
     val repository = remember { createWarrantyRepository(driverFactory) }
     val warranties by repository.observeAll().collectAsState(initial = emptyList())
     val coroutineScope = rememberCoroutineScope()
-    var screen by remember { mutableStateOf(AppScreen.Home) }
+    var screen by remember { mutableStateOf(startScreen) }
     var themeMode by remember { mutableStateOf(ThemeMode.System) }
     var celebrateSave by remember { mutableStateOf(false) }
 

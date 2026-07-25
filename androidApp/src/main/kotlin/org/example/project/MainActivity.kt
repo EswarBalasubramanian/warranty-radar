@@ -14,9 +14,19 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        setContent {
-            App(DatabaseDriverFactory(applicationContext))
+        val startScreen = if (intent?.action == ACTION_ADD_RECEIPT) {
+            AppScreen.PasteReceipt
+        } else {
+            AppScreen.Home
         }
+
+        setContent {
+            App(DatabaseDriverFactory(applicationContext), startScreen)
+        }
+    }
+
+    companion object {
+        const val ACTION_ADD_RECEIPT = "org.example.project.ADD_RECEIPT"
     }
 }
 

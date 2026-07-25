@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="add_receipt"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_add_receipt"
+        android:shortcutShortLabel="@string/shortcut_add_receipt_short"
+        android:shortcutLongLabel="@string/shortcut_add_receipt_long">
+        <intent
+            android:action="org.example.project.ADD_RECEIPT"
+            android:targetPackage="com.snekorgs.warrantyradar"
+            android:targetClass="org.example.project.MainActivity" />
+    </shortcut>
+</shortcuts>

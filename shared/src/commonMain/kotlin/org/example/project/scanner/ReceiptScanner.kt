@@ -39,6 +39,86 @@ class ReceiptScannerController(
 @Composable
 expect fun rememberReceiptScannerController(onScanned: (ScannedReceipt) -> Unit): ReceiptScannerController
 
+// Matches a monetary token as a whole so it can be normalized afterward. Three
+// alternatives, tried in order: a currency-symbol-prefixed number (decimals
+// optional — many receipts show whole-currency totals with no cents), a
+// thousands-grouped number with no symbol ("7,995" / "1,234.56"), or a plain
+// two-decimal amount ("349.00"). Matching the full token (instead of a single
+// capture group) avoids truncating grouped digits like "7,995" into "7,99".
+private val priceRegex = Regex(
+    """[£$€₹]\s?\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?|\d{1,3}(?:,\d{2,3})+(?:\.\d{1,2})?|\d+\.\d{2}"""
+)
+
+private fun MatchResult.priceValue(): Double? =
+    value.trim().trimStart('£', '$', '€', '₹').trim().replace(",", "").toDoubleOrNull()
+
+// Store names sit in the first few header lines. Anything that looks like an
+// address, phone number, receipt/order number, URL, date, price, or common
+// web/product-page chrome (breadcrumbs, media badges, marketing copy) on its
+// own line is almost certainly not the store name, even if it appears early.
+private val storeExclusionRegex = Regex(
+    """receipt|invoice|order\s*#|order\s*no|tel[:.]|phone|fax|www\.|http|@|customer\s+copy|thank\s+you|cashier|register|store\s*#|transaction|\bvat\b|\babn\b|\bein\b|""" +
+        """\bvideos?\b|\bphotos?\b|\bprime\b|\btomorrow\b|\bemi\b|\bvisit\s+the\b|\bsearch\s+this\s+page\b|\bask\b|\brufus\b|\bbought\s+in\s+past\s+month\b|\blimited\s+time\s+deal\b|\bprice\s+history\b|>""",
+    RegexOption.IGNORE_CASE
+)
+private val addressCueRegex = Regex(
+    """\b(street|st\.|road|rd\.|avenue|ave\.|blvd|boulevard|lane|ln\.|suite|ste\.|floor|fl\.|drive|dr\.)\b""",
+    RegexOption.IGNORE_CASE
+)
+private val phoneRegex = Regex("""\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}""")
+private val dateLikeRegex = Regex("""\d{1,4}[/\-.]\d{1,2}[/\-.]\d{1,4}""")
+
+private fun looksLikeStoreName(line: String): Boolean {
+    if (line.length !in 2..40) return false
+    if (!line.any { it.isLetter() }) return false
+    if (line.count { it.isDigit() } > line.length / 3) return false
+    if (storeExclusionRegex.containsMatchIn(line)) return false
+    if (addressCueRegex.containsMatchIn(line)) return false
+    if (phoneRegex.containsMatchIn(line)) return false
+    if (dateLikeRegex.containsMatchIn(line)) return false
+    if (priceRegex.containsMatchIn(line)) return false
+    return true
+}
+
+// Invoices frequently state the seller explicitly via a label — "Sold By :" is the
+// standard Amazon-style pattern. The seller name follows either right after the
+// colon on the same line, or (more often) on the next line entirely. This is a much
+// stronger signal than "first plausible-looking line", so it's tried first.
+private val storeCueRegex = Regex("""^(?:sold\s*by|seller|vendor|merchant)\s*:?\s*(.*)$""", RegexOption.IGNORE_CASE)
+
+private fun findStoreByCue(lines: List<String>): String? {
+    lines.forEachIndexed { index, line ->
+        val match = storeCueRegex.find(line) ?: return@forEachIndexed
+        val inline = match.groupValues[1].trim()
+        if (inline.isNotEmpty() && looksLikeStoreName(inline)) return inline
+        val next = lines.getOrNull(index + 1)
+        if (next != null && looksLikeStoreName(next)) return next
+    }
+    return null
+}
+
+// "Total" lines are ranked by how specific/authoritative the keyword is, and
+// subtotal/tax lines are excluded outright since "subtotal" also contains "total".
+private val subtotalRegex = Regex("""sub[\s-]?total|\btax\b""", RegexOption.IGNORE_CASE)
+private val totalPriorityKeywords = listOf(
+    "grand total", "total due", "amount due", "balance due", "total paid", "total amount", "total", "amount", "balance"
+)
+
+// Purchase date should come from a line that talks about the purchase/transaction
+// itself, never from an expiry/warranty/best-before line (those are policy end dates).
+private val purchaseDateCueRegex = Regex(
+    """\b(date|purchase|sold|transaction|order\s*date|invoice\s*date)\b""",
+    RegexOption.IGNORE_CASE
+)
+private val purchaseDateExclusionRegex = Regex(
+    """\bexp(?:iry|ires?|iration)?\b|valid\s*until|warrant|due\s*date|best\s*before|return\s*by|expires?\s*on""",
+    RegexOption.IGNORE_CASE
+)
+private val dateRegex = Regex(
+    """\b(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{2,4})\b""",
+    RegexOption.IGNORE_CASE
+)
+
 /**
  * Best-effort heuristics for pre-filling the receipt form from raw OCR text.
  * Intentionally conservative: returns null guesses rather than a wrong-looking value
@@ -47,24 +127,35 @@ expect fun rememberReceiptScannerController(onScanned: (ScannedReceipt) -> Unit)
 fun parseReceiptGuesses(rawText: String): ScannedReceipt {
     val lines = rawText.lines().map { it.trim() }.filter { it.isNotBlank() }
 
-    val guessedStore = lines.firstOrNull { line ->
-        line.length in 2..40 && line.any { it.isLetter() }
-    }
+    val guessedStore = findStoreByCue(lines)
+        ?: lines.take(8).firstOrNull { looksLikeStoreName(it) }
+        ?: lines.firstOrNull { looksLikeStoreName(it) }
 
-    val priceRegex = Regex("""[£$€]?\s?(\d{1,5}(?:[.,]\d{2}))""")
-    val totalKeywords = listOf("total", "amount due", "amount", "balance", "grand total")
-    val totalLineMatch = lines
-        .firstOrNull { line -> totalKeywords.any { keyword -> line.contains(keyword, ignoreCase = true) } }
-        ?.let { line -> priceRegex.find(line) }
-    val guessedPrice = (totalLineMatch ?: priceRegex.findAll(rawText).maxByOrNull {
-        it.groupValues[1].replace(",", ".").toDoubleOrNull() ?: 0.0
-    })?.groupValues?.get(1)?.replace(",", ".")?.toDoubleOrNull()
+    // The keyword must lead the line ("Total: $50.00", "Grand Total  $50.00") rather than
+    // appear anywhere in it, otherwise marketing copy like "Amazon Pay Balance" would
+    // falsely match the bare "balance" keyword. Tabular rows often show several prices on
+    // the total line itself (e.g. "TOTAL: $5.33 tax $349.00 total") — the actual total is
+    // always the largest of them, since tax/discount components can't exceed the total.
+    val nonSubtotalLines = lines.filterNot { subtotalRegex.containsMatchIn(it) }
+    val totalLineMatch = totalPriorityKeywords
+        .asSequence()
+        .mapNotNull { keyword ->
+            nonSubtotalLines.firstNotNullOfOrNull { line ->
+                if (line.startsWith(keyword, ignoreCase = true)) {
+                    priceRegex.findAll(line).mapNotNull { it.priceValue() }.maxOrNull()
+                } else null
+            }
+        }
+        .firstOrNull()
+    val guessedPrice = totalLineMatch
+        ?: priceRegex.findAll(rawText).mapNotNull { it.priceValue() }.maxOrNull()
 
-    val dateRegex = Regex(
-        """\b(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{2,4})\b""",
-        RegexOption.IGNORE_CASE
-    )
-    val guessedDate = dateRegex.find(rawText)?.value?.trim()
+    val dateCandidateLines = lines.filterNot { purchaseDateExclusionRegex.containsMatchIn(it) }
+    val guessedDate = (
+        dateCandidateLines.firstOrNull { purchaseDateCueRegex.containsMatchIn(it) }?.let { dateRegex.find(it)?.value }
+            ?: dateCandidateLines.firstNotNullOfOrNull { dateRegex.find(it)?.value }
+            ?: dateRegex.find(rawText)?.value
+        )?.trim()
 
     return ScannedReceipt(
         rawText = rawText,
@@ -85,7 +176,7 @@ fun parseReceiptGuesses(rawText: String): ScannedReceipt {
 
 private val kindMatchers: List<Pair<Regex, PolicyKind>> = listOf(
     Regex("""\breplace(?:ment|ments|able|d)?\b|\bexchange\b""", RegexOption.IGNORE_CASE) to PolicyKind.Replacement,
-    Regex("""\breturn(?:able|s)?\b|\brefund(?:s|able)?\b|\bmoney[\s-]?back\b""", RegexOption.IGNORE_CASE) to PolicyKind.Return,
+    Regex("""\breturn(?:able|s)?\b|\brefund(?:s|able)?\b|\bmoney[\s-]?back\b|\bstore\s+credit\b""", RegexOption.IGNORE_CASE) to PolicyKind.Return,
     Regex("""\bprotection\b|\binsurance\b|\bdamage\s+cover""", RegexOption.IGNORE_CASE) to PolicyKind.Protection,
     Regex("""\bwarrant(?:y|ies|ee)\b|\bguarantee?d?\b|\bguaranty\b""", RegexOption.IGNORE_CASE) to PolicyKind.Warranty,
     Regex("""\brepair(?:s|ed)?\b""", RegexOption.IGNORE_CASE) to PolicyKind.Repair,
@@ -97,7 +188,7 @@ private val kindMatchers: List<Pair<Regex, PolicyKind>> = listOf(
 // A segment only becomes a draft when it carries real policy substance, so page
 // furniture like "Return to top" doesn't get captured.
 private val strongPolicyPhrases = Regex(
-    """warrant|guarant|replacement|returnable|non[\s-]?returnable|return\s+policy|free\s+returns?|refund|money[\s-]?back|protection\s+plan|insurance|service\s+cent|extended\s+cover|repair""",
+    """warrant|guarant|replacement|returnable|non[\s-]?returnable|return\s+policy|free\s+returns?|refund|money[\s-]?back|store\s+credit|protection\s+plan|insurance|service\s+cent|extended\s+cover|repair""",
     RegexOption.IGNORE_CASE
 )
 

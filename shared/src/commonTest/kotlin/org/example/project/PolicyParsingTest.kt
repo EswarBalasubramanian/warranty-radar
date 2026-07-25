@@ -14,6 +14,7 @@ import org.example.project.model.policyKindFrom
 import org.example.project.model.resolvedEndEpochDay
 import org.example.project.scanner.extractPolicyDrafts
 import org.example.project.scanner.mergePolicyDrafts
+import org.example.project.scanner.parseReceiptGuesses
 
 class PolicyParsingTest {
 
@@ -145,5 +146,97 @@ class PolicyParsingTest {
         assertNull(policyActionHint(PolicyKind.Warranty, 200))
         assertNull(policyActionHint(PolicyKind.Return, -1))
         assertNull(policyActionHint(PolicyKind.Return, null))
+    }
+
+    @Test
+    fun guessesStoreNameSkippingAddressAndPhoneLines() {
+        val receipt = parseReceiptGuesses(
+            """
+            123 Main Street
+            (555) 123-4567
+            Currys PC World
+            Receipt #4471
+            Total: ${'$'}349.00
+            """.trimIndent()
+        )
+        assertEquals("Currys PC World", receipt.guessedStore)
+    }
+
+    @Test
+    fun guessesGrandTotalOverSubtotalAndTax() {
+        val receipt = parseReceiptGuesses(
+            """
+            Best Buy
+            Subtotal: ${'$'}299.00
+            Tax: ${'$'}24.00
+            Grand Total: ${'$'}323.00
+            """.trimIndent()
+        )
+        assertEquals(323.00, receipt.guessedPrice)
+    }
+
+    @Test
+    fun guessesStoreFromSoldByLabelOnNextLine() {
+        val receipt = parseReceiptGuesses(
+            """
+            Tax Invoice/Bill of Supply/Cash Memo
+            Order Date: 06.06.2026
+            TOTAL: ₹533.75 ₹3,499.00
+            Sold By :
+            Clicktech Retail Private Limited
+            Bangalore, Karnataka, 562107
+            """.trimIndent()
+        )
+        assertEquals("Clicktech Retail Private Limited", receipt.guessedStore)
+    }
+
+    @Test
+    fun guessesLargestPriceOnTabularTotalLine() {
+        val receipt = parseReceiptGuesses(
+            """
+            TP-Link AX1500 Wi-Fi 6 Range Extender
+            HSN:84717030
+            ₹2,965.25 1 ₹2,965.25 18% IGST ₹533.75 ₹3,499.00
+            TOTAL: ₹533.75 ₹3,499.00
+            """.trimIndent()
+        )
+        assertEquals(3499.00, receipt.guessedPrice)
+    }
+
+    @Test
+    fun guessesThousandsSeparatedPriceCorrectlyInsteadOfTruncating() {
+        val receipt = parseReceiptGuesses(
+            """
+            APC Back-UPS BX1100C-IN
+            Cashback Upto ${'$'}399.00 cashback as Amazon Pay Balance when...
+            -21% ₹7,995
+            M.R.P.: ₹10,100
+            """.trimIndent()
+        )
+        assertEquals(10100.0, receipt.guessedPrice)
+    }
+
+    @Test
+    fun ignoresMediaGalleryBadgeWhenGuessingStoreName() {
+        val receipt = parseReceiptGuesses(
+            """
+            3 VIDEOS
+            APC Back-UPS BX1100C-IN 1100VA / 660W UPS
+            Visit the APC Store
+            """.trimIndent()
+        )
+        assertNull(receipt.guessedStore)
+    }
+
+    @Test
+    fun guessesPurchaseDateIgnoringExpiryLine() {
+        val receipt = parseReceiptGuesses(
+            """
+            Best Buy
+            Purchase Date: 01/07/2026
+            Warranty expires: 01/07/2028
+            """.trimIndent()
+        )
+        assertEquals("01/07/2026", receipt.guessedPurchaseDateLabel)
     }
 }
