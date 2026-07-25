@@ -8,7 +8,8 @@ CREATE TABLE warrantyEntity (
     urgencyDays INTEGER,
     price REAL,
     shape TEXT NOT NULL,
-    warrantyEndDateLabel TEXT
+    warrantyEndDateLabel TEXT,
+    photoPath TEXT
 );
 
 -- One row per warranty / replacement / return / service promise. kind and source
@@ -34,8 +35,8 @@ countAll:
 SELECT COUNT(*) FROM warrantyEntity;
 
 insertWarranty:
-INSERT INTO warrantyEntity(id, productName, store, category, purchaseDateLabel, warrantyStatusLabel, urgencyDays, price, shape, warrantyEndDateLabel)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO warrantyEntity(id, productName, store, category, purchaseDateLabel, warrantyStatusLabel, urgencyDays, price, shape, warrantyEndDateLabel, photoPath)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 selectAllPolicies:
 SELECT * FROM policyEntity;
@@ -43,3 +44,12 @@ SELECT * FROM policyEntity;
 insertPolicy:
 INSERT INTO policyEntity(id, warrantyId, kind, title, provider, durationDays, endEpochDay, endDateLabel, notes, source)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteWarrantyById:
+DELETE FROM warrantyEntity WHERE id = ?;
+
+selectPhotoPathById:
+SELECT photoPath FROM warrantyEntity WHERE id = ?;
+
+deletePoliciesForWarranty:
+DELETE FROM policyEntity WHERE warrantyId = ?;

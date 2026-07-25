@@ -1,6 +1,8 @@
 package org.example.project.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,7 +67,7 @@ import org.example.project.model.todayEpochDay
 import org.example.project.theme.AppTheme
 
 @Composable
-fun HomeScreen(warranties: List<Warranty>) {
+fun HomeScreen(warranties: List<Warranty>, onEditWarranty: (Warranty) -> Unit = {}) {
     var query by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(ALL_CATEGORIES) }
 
@@ -87,7 +89,7 @@ fun HomeScreen(warranties: List<Warranty>) {
     ) {
         item { LibraryHeader(subtitle = coverageSubtitle(warranties.size, attentionItems.size)) }
         if (heroItem != null) {
-            item { HeroCard(heroItem) }
+            item { HeroCard(heroItem, onClick = { onEditWarranty(heroItem) }) }
         }
         if (attentionItems.isNotEmpty()) {
             item { AttentionBanner(attentionItems) }
@@ -100,7 +102,7 @@ fun HomeScreen(warranties: List<Warranty>) {
                 onSelect = { selectedCategory = it }
             )
         }
-        item { PurchaseLibrary(filtered) }
+        item { PurchaseLibrary(filtered, onSelect = onEditWarranty) }
     }
 }
 
@@ -136,16 +138,18 @@ private fun LibraryHeader(subtitle: String) {
 }
 
 @Composable
-private fun HeroCard(warranty: Warranty) {
+private fun HeroCard(warranty: Warranty, onClick: () -> Unit) {
     val colors = AppTheme.colors
     val days = warranty.urgencyDays
     val fraction = if (days != null) (days / 365f).coerceIn(0.08f, 1f) else 1f
     val ringColor = if (days != null) urgencyColor(days, colors) else colors.success
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        color = colors.glass,
-        shadowElevation = 8.dp
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, colors.divider, RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = colors.glass
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

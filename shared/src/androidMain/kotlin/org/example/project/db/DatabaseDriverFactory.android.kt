@@ -8,3 +8,7 @@ actual class DatabaseDriverFactory(private val context: Context) {
     actual fun createDriver(): SqlDriver? =
         AndroidSqliteDriver(WarrantyDatabase.Schema, context, "warranty.db")
 }
+
+actual fun deleteStoredFile(path: String) {
+    java.io.File(path).delete()
+}

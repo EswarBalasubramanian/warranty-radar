@@ -79,21 +79,45 @@ private val durationChoices = listOf(
     "2 years" to 730
 )
 
+private fun CoveragePolicy.toDraft() = PolicyDraft(
+    kind = kind,
+    title = title,
+    provider = provider,
+    durationDays = durationDays,
+    endEpochDay = endEpochDay,
+    notes = notes,
+    fromScan = source == PolicySource.Scanned
+)
+
+private fun formatPriceInput(price: Double): String =
+    if (price == price.toLong().toDouble()) price.toLong().toString() else price.toString()
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
+fun PasteReceiptScreen(
+    onSaved: (Warranty) -> Unit,
+    onCancel: () -> Unit,
+    existing: Warranty? = null,
+    onDelete: (() -> Unit)? = null,
+    existingCategories: List<String> = emptyList(),
+    onViewPhoto: (String) -> Unit = {}
+) {
     val colors = AppTheme.colors
     var receiptText by remember { mutableStateOf("") }
-    var productName by remember { mutableStateOf("") }
-    var store by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
-    var priceText by remember { mutableStateOf("") }
+    var productName by remember(existing) { mutableStateOf(existing?.productName.orEmpty()) }
+    var store by remember(existing) { mutableStateOf(existing?.store.orEmpty()) }
+    var category by remember(existing) { mutableStateOf(existing?.category.orEmpty()) }
+    var photoPath by remember(existing) { mutableStateOf(existing?.photoPath) }
+    var priceText by remember(existing) { mutableStateOf(existing?.price?.let { formatPriceInput(it) }.orEmpty()) }
     var purchaseEpochDay by remember { mutableStateOf<Int?>(null) }
-    var purchaseDateRawGuess by remember { mutableStateOf<String?>(null) }
+    var purchaseDateRawGuess by remember(existing) { mutableStateOf(existing?.purchaseDateLabel) }
     var showPurchaseDatePicker by remember { mutableStateOf(false) }
-    val policyDrafts = remember { mutableStateListOf<PolicyDraft>() }
+    val policyDrafts = remember(existing) {
+        mutableStateListOf<PolicyDraft>().apply { existing?.policies?.forEach { add(it.toDraft()) } }
+    }
     var scansCount by remember { mutableStateOf(0) }
     var showPolicyEditor by remember { mutableStateOf(false) }
+    var confirmingDelete by remember { mutableStateOf(false) }
     val canSave = productName.isNotBlank()
 
     val purchaseDateLabel = purchaseEpochDay?.let { formatEpochDayLabel(it) } ?: purchaseDateRawGuess.orEmpty()
@@ -111,6 +135,7 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
         policyDrafts.clear()
         policyDrafts.addAll(merged)
         receiptText = if (receiptText.isBlank()) scanned.rawText else receiptText + "\n\n" + scanned.rawText
+        scanned.photoPath?.let { photoPath = it }
         scansCount += 1
     }
 
@@ -138,15 +163,50 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 28.dp)) {
             Text("Warranty Radar", color = colors.accent, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Spacer(Modifier.height(28.dp))
-            Text("Add a receipt", color = colors.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Text(if (existing != null) "Edit purchase" else "Add a receipt", color = colors.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
-            Text("Fill in the purchase details. We'll help you keep track of the warranty.", color = colors.mutedInk, lineHeight = 22.sp)
+            Text(
+                if (existing != null) "Update the details or coverage for this purchase." else "Fill in the purchase details. We'll help you keep track of the warranty.",
+                color = colors.mutedInk,
+                lineHeight = 22.sp
+            )
             Spacer(Modifier.height(24.dp))
 
             LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                item {
+                    ReceiptUpload(
+                        status = scanner.status,
+                        scannedSummary = scanSummary(scansCount, policyDrafts.count { it.fromScan }),
+                        onTakePhoto = scanner.captureFromCamera,
+                        onChoosePhoto = scanner.pickFromGallery,
+                        onChoosePdf = scanner.pickPdf
+                    )
+                }
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
+                        Text("OR", color = colors.mutedInk, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
+                    }
+                }
                 item { LabeledField("Product name", productName, { productName = it }, "e.g. Sony WH-1000XM5") }
                 item { LabeledField("Store", store, { store = it }, "e.g. Currys") }
-                item { LabeledField("Category", category, { category = it }, "e.g. Tech") }
+                item {
+                    Column {
+                        LabeledField("Category", category, { category = it }, "e.g. Tech")
+                        if (existingCategories.isNotEmpty()) {
+                            Spacer(Modifier.height(8.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                existingCategories.take(6).forEach { suggestion ->
+                                    FilterPill(suggestion, category == suggestion, onClick = { category = suggestion })
+                                }
+                            }
+                        }
+                    }
+                }
                 item { LabeledField("Price", priceText, { priceText = it }, "e.g. 349.00") }
                 item {
                     DateField(
@@ -180,6 +240,9 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
                         )
                     }
                 }
+                if (photoPath != null) {
+                    item { ReceiptPhotoCard(onView = { onViewPhoto(photoPath!!) }) }
+                }
                 item {
                     Column {
                         Text("Receipt notes", color = colors.ink, fontWeight = FontWeight.SemiBold)
@@ -187,24 +250,26 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
                         OutlinedTextField(value = receiptText, onValueChange = { receiptText = it }, modifier = Modifier.fillMaxWidth().height(100.dp), placeholder = { Text("Paste any other receipt details here…") }, shape = RoundedCornerShape(14.dp))
                     }
                 }
-                item {
+            }
+
+            if (existing != null && onDelete != null) {
+                Spacer(Modifier.height(16.dp))
+                if (confirmingDelete) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
-                        Text("OR", color = colors.mutedInk, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                        Spacer(Modifier.weight(1f).height(1.dp).background(colors.divider))
+                        Text("Delete this purchase for good?", color = colors.alert, fontSize = 13.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+                        Text("Keep it", color = colors.mutedInk, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = { confirmingDelete = false }).padding(6.dp))
+                        Text("Delete", color = colors.alert, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable(onClick = onDelete).padding(6.dp))
                     }
-                }
-                item {
-                    ReceiptUpload(
-                        status = scanner.status,
-                        scannedSummary = scanSummary(scansCount, policyDrafts.count { it.fromScan }),
-                        onTakePhoto = scanner.captureFromCamera,
-                        onChoosePhoto = scanner.pickFromGallery,
-                        onChoosePdf = scanner.pickPdf
+                } else {
+                    Text(
+                        "Delete purchase",
+                        color = colors.alert,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable(onClick = { confirmingDelete = true })
                     )
                 }
             }
-
             Spacer(Modifier.height(16.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(
@@ -217,13 +282,15 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
                     onClick = {
                         onSaved(
                             buildWarranty(
+                                id = existing?.id,
                                 productName = productName,
                                 store = store,
                                 category = category,
                                 priceText = priceText,
                                 purchaseDateLabel = purchaseDateLabel,
                                 purchaseEpochDay = purchaseEpochDay,
-                                drafts = policyDrafts.toList()
+                                drafts = policyDrafts.toList(),
+                                photoPath = photoPath
                             )
                         )
                     },
@@ -231,7 +298,7 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
                     modifier = Modifier.weight(1f).height(54.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.accent)
-                ) { Text("Save receipt", fontWeight = FontWeight.Bold) }
+                ) { Text(if (existing != null) "Save changes" else "Save receipt", fontWeight = FontWeight.Bold) }
             }
         }
     }
@@ -250,9 +317,11 @@ private fun buildWarranty(
     priceText: String,
     purchaseDateLabel: String,
     purchaseEpochDay: Int?,
-    drafts: List<PolicyDraft>
+    drafts: List<PolicyDraft>,
+    id: String? = null,
+    photoPath: String? = null
 ): Warranty {
-    val id = newWarrantyId()
+    val id = id ?: newWarrantyId()
     val today = todayEpochDay()
     val anchorDay = purchaseEpochDay ?: today
     val policies = drafts.mapIndexed { index, draft ->
@@ -281,7 +350,8 @@ private fun buildWarranty(
         shape = ProductShape.Other,
         warrantyEndDateLabel = policies.firstOrNull { it.kind == PolicyKind.Warranty }?.endDateLabel
             ?: policies.firstOrNull()?.endDateLabel,
-        policies = policies
+        policies = policies,
+        photoPath = photoPath
     )
 }
 
@@ -581,6 +651,31 @@ private fun LabeledField(label: String, value: String, onValueChange: (String) -
             singleLine = true,
             shape = RoundedCornerShape(14.dp)
         )
+    }
+}
+
+@Composable
+private fun ReceiptPhotoCard(onView: () -> Unit) {
+    val colors = AppTheme.colors
+    Surface(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onView),
+        shape = RoundedCornerShape(14.dp),
+        color = colors.uploadBackground
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(colors.uploadIconBackground), contentAlignment = Alignment.Center) {
+                Text("▣", color = colors.accent, fontSize = 18.sp)
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Receipt photo saved", color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text("Tap to view the original", color = colors.mutedInk, fontSize = 12.sp)
+            }
+            Text("View", color = colors.accent, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        }
     }
 }
 

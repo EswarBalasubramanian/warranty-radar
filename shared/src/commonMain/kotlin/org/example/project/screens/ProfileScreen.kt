@@ -1,7 +1,9 @@
 package org.example.project.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -28,13 +31,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.example.project.components.FilterPill
 import org.example.project.components.formatCurrency
 import org.example.project.model.Warranty
 import org.example.project.theme.AppTheme
 import org.example.project.theme.ThemeMode
 
+val reminderThresholdOptions = listOf(7 to "1 week", 3 to "3 days", 1 to "1 day", 0 to "Due day")
+
 @Composable
-fun ProfileScreen(warranties: List<Warranty>, themeMode: ThemeMode, onThemeModeChange: (ThemeMode) -> Unit) {
+fun ProfileScreen(
+    warranties: List<Warranty>,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit,
+    enabledReminderThresholds: Set<Int> = emptySet(),
+    onReminderThresholdsChange: (Set<Int>) -> Unit = {},
+    onExport: () -> Unit = {}
+) {
     val colors = AppTheme.colors
     LazyColumn(
         modifier = Modifier
@@ -46,6 +59,8 @@ fun ProfileScreen(warranties: List<Warranty>, themeMode: ThemeMode, onThemeModeC
         item { ProfileHeader() }
         item { StatsCard(warranties) }
         item { AppearanceCard(themeMode, onThemeModeChange) }
+        item { ReminderTimingCard(enabledReminderThresholds, onReminderThresholdsChange) }
+        item { ExportCard(onExport) }
     }
 }
 
@@ -76,10 +91,9 @@ private fun StatsCard(warranties: List<Warranty>) {
     val totalValue = warranties.sumOf { it.price ?: 0.0 }
     val storeCount = warranties.map { it.store }.distinct().size
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = colors.glass,
-        shadowElevation = 6.dp
+        modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        color = colors.glass
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Text("Your library at a glance", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
@@ -104,10 +118,9 @@ private fun ProfileStatRow(label: String, value: String) {
 private fun AppearanceCard(themeMode: ThemeMode, onThemeModeChange: (ThemeMode) -> Unit) {
     val colors = AppTheme.colors
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = colors.glass,
-        shadowElevation = 6.dp
+        modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        color = colors.glass
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Text("Appearance", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
@@ -128,6 +141,53 @@ private fun AppearanceCard(themeMode: ThemeMode, onThemeModeChange: (ThemeMode) 
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ReminderTimingCard(enabledThresholds: Set<Int>, onChange: (Set<Int>) -> Unit) {
+    val colors = AppTheme.colors
+    Surface(
+        modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        color = colors.glass
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Text("Reminder timing", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(4.dp))
+            Text("When should we nudge you before a deadline?", color = colors.mutedInk, fontSize = 13.sp)
+            Spacer(Modifier.height(14.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                reminderThresholdOptions.forEach { (days, label) ->
+                    FilterPill(
+                        label = label,
+                        selected = days in enabledThresholds,
+                        onClick = {
+                            onChange(if (days in enabledThresholds) enabledThresholds - days else enabledThresholds + days)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExportCard(onExport: () -> Unit) {
+    val colors = AppTheme.colors
+    Surface(
+        modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(16.dp)).clickable(onClick = onExport),
+        shape = RoundedCornerShape(16.dp),
+        color = colors.glass
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Text("Export your data", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(4.dp))
+            Text("Save every purchase and its coverage as a JSON file you can back up or move elsewhere.", color = colors.mutedInk, fontSize = 13.sp, lineHeight = 17.sp)
         }
     }
 }

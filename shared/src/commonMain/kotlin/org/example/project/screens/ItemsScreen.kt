@@ -25,7 +25,7 @@ import org.example.project.model.Warranty
 import org.example.project.theme.AppTheme
 
 @Composable
-fun ItemsScreen(warranties: List<Warranty>) {
+fun ItemsScreen(warranties: List<Warranty>, onEditWarranty: (Warranty) -> Unit = {}) {
     val colors = AppTheme.colors
     var query by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(ALL_CATEGORIES) }
@@ -52,6 +52,6 @@ fun ItemsScreen(warranties: List<Warranty>) {
                 title = "Browse by category"
             )
         }
-        item { PurchaseLibrary(filtered, title = "Matching items") }
+        item { PurchaseLibrary(filtered, title = "Matching items", onSelect = onEditWarranty) }
     }
 }

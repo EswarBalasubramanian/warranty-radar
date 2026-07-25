@@ -61,5 +61,6 @@ data class Warranty(
     val price: Double?,
     val shape: ProductShape,
     val warrantyEndDateLabel: String? = null,
-    val policies: List<CoveragePolicy> = emptyList()
+    val policies: List<CoveragePolicy> = emptyList(),
+    val photoPath: String? = null
 )

@@ -13,7 +13,8 @@ data class ScannedReceipt(
     val guessedStore: String? = null,
     val guessedPrice: Double? = null,
     val guessedPurchaseDateLabel: String? = null,
-    val guessedPolicies: List<PolicyDraft> = emptyList()
+    val guessedPolicies: List<PolicyDraft> = emptyList(),
+    val photoPath: String? = null
 )
 
 sealed interface ScanStatus {
