@@ -82,7 +82,7 @@ fun CategoryFilters(categories: List<String>, selected: String, onSelect: (Strin
 }
 
 @Composable
-fun PurchaseLibrary(warranties: List<Warranty>, title: String = "Your purchases") {
+fun PurchaseLibrary(warranties: List<Warranty>, title: String = "Your purchases", onSelect: (Warranty) -> Unit = {}) {
     val colors = AppTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -107,7 +107,7 @@ fun PurchaseLibrary(warranties: List<Warranty>, title: String = "Your purchases"
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     rowItems.forEach { warranty ->
                         Box(modifier = Modifier.weight(1f)) {
-                            ProductTile(warranty)
+                            ProductTile(warranty, onClick = { onSelect(warranty) })
                         }
                     }
                     if (rowItems.size == 1) {

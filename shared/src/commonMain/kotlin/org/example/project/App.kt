@@ -28,6 +28,7 @@ import org.example.project.screens.HomeScreen
 import org.example.project.screens.ItemsScreen
 import org.example.project.screens.PasteReceiptScreen
 import org.example.project.screens.ProfileScreen
+import org.example.project.model.Warranty
 import org.example.project.theme.AppTheme
 import org.example.project.theme.ThemeMode
 import org.example.project.theme.WarrantyRadarTheme
@@ -42,6 +43,11 @@ fun App(driverFactory: DatabaseDriverFactory, startScreen: AppScreen = AppScreen
     var screen by remember { mutableStateOf(startScreen) }
     var themeMode by remember { mutableStateOf(ThemeMode.System) }
     var celebrateSave by remember { mutableStateOf(false) }
+    var editingWarranty by remember { mutableStateOf<Warranty?>(null) }
+    val openEditor: (Warranty) -> Unit = { warranty ->
+        editingWarranty = warranty
+        screen = AppScreen.PasteReceipt
+    }
 
     LaunchedEffect(celebrateSave) {
         if (celebrateSave) {
@@ -53,25 +59,37 @@ fun App(driverFactory: DatabaseDriverFactory, startScreen: AppScreen = AppScreen
     WarrantyRadarTheme(themeMode) {
         Box(modifier = Modifier.fillMaxSize()) {
             when (screen) {
-                AppScreen.Home -> AppScaffold(AppScreen.Home, onNavigate = { screen = it }, onAddReceipt = { screen = AppScreen.PasteReceipt }) {
-                    HomeScreen(warranties)
+                AppScreen.Home -> AppScaffold(AppScreen.Home, onNavigate = { screen = it }, onAddReceipt = { editingWarranty = null; screen = AppScreen.PasteReceipt }) {
+                    HomeScreen(warranties, onEditWarranty = openEditor)
                 }
-                AppScreen.Items -> AppScaffold(AppScreen.Items, onNavigate = { screen = it }, onAddReceipt = { screen = AppScreen.PasteReceipt }) {
-                    ItemsScreen(warranties)
+                AppScreen.Items -> AppScaffold(AppScreen.Items, onNavigate = { screen = it }, onAddReceipt = { editingWarranty = null; screen = AppScreen.PasteReceipt }) {
+                    ItemsScreen(warranties, onEditWarranty = openEditor)
                 }
-                AppScreen.Calendar -> AppScaffold(AppScreen.Calendar, onNavigate = { screen = it }, onAddReceipt = { screen = AppScreen.PasteReceipt }) {
+                AppScreen.Calendar -> AppScaffold(AppScreen.Calendar, onNavigate = { screen = it }, onAddReceipt = { editingWarranty = null; screen = AppScreen.PasteReceipt }) {
                     CalendarScreen(warranties)
                 }
-                AppScreen.Profile -> AppScaffold(AppScreen.Profile, onNavigate = { screen = it }, onAddReceipt = { screen = AppScreen.PasteReceipt }) {
+                AppScreen.Profile -> AppScaffold(AppScreen.Profile, onNavigate = { screen = it }, onAddReceipt = { editingWarranty = null; screen = AppScreen.PasteReceipt }) {
                     ProfileScreen(warranties, themeMode, onThemeModeChange = { themeMode = it })
                 }
                 AppScreen.PasteReceipt -> PasteReceiptScreen(
+                    existing = editingWarranty,
                     onSaved = { warranty ->
-                        coroutineScope.launch { repository.insert(warranty) }
+                        val wasEditing = editingWarranty != null
+                        coroutineScope.launch {
+                            if (wasEditing) repository.update(warranty) else repository.insert(warranty)
+                        }
+                        editingWarranty = null
                         screen = AppScreen.Home
                         celebrateSave = true
                     },
-                    onCancel = { screen = AppScreen.Home }
+                    onCancel = { editingWarranty = null; screen = AppScreen.Home },
+                    onDelete = editingWarranty?.let { warranty ->
+                        {
+                            coroutineScope.launch { repository.delete(warranty.id) }
+                            editingWarranty = null
+                            screen = AppScreen.Home
+                        }
+                    }
                 )
             }
             SavedCelebration(

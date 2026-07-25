@@ -127,7 +127,7 @@ fun ReviewItem(title: String, subtitle: String, time: String, accent: Color, pro
 }
 
 @Composable
-fun ProductTile(warranty: Warranty) {
+fun ProductTile(warranty: Warranty, onClick: () -> Unit = {}) {
     val colors = AppTheme.colors
     val artworkColor = tileColorFor(warranty.shape, colors)
     val statusColor = if (warranty.urgencyDays != null) urgencyColor(warranty.urgencyDays, colors) else colors.success
@@ -137,7 +137,8 @@ fun ProductTile(warranty: Warranty) {
         modifier = Modifier
             .fillMaxWidth()
             .pressBounce(0.965f)
-            .clip(tileShape),
+            .clip(tileShape)
+            .clickable(onClick = onClick),
         shape = tileShape,
         color = artworkColor
     ) {

@@ -43,3 +43,9 @@ SELECT * FROM policyEntity;
 insertPolicy:
 INSERT INTO policyEntity(id, warrantyId, kind, title, provider, durationDays, endEpochDay, endDateLabel, notes, source)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteWarrantyById:
+DELETE FROM warrantyEntity WHERE id = ?;
+
+deletePoliciesForWarranty:
+DELETE FROM policyEntity WHERE warrantyId = ?;

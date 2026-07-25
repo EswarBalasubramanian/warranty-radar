@@ -79,21 +79,42 @@ private val durationChoices = listOf(
     "2 years" to 730
 )
 
+private fun CoveragePolicy.toDraft() = PolicyDraft(
+    kind = kind,
+    title = title,
+    provider = provider,
+    durationDays = durationDays,
+    endEpochDay = endEpochDay,
+    notes = notes,
+    fromScan = source == PolicySource.Scanned
+)
+
+private fun formatPriceInput(price: Double): String =
+    if (price == price.toLong().toDouble()) price.toLong().toString() else price.toString()
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
+fun PasteReceiptScreen(
+    onSaved: (Warranty) -> Unit,
+    onCancel: () -> Unit,
+    existing: Warranty? = null,
+    onDelete: (() -> Unit)? = null
+) {
     val colors = AppTheme.colors
     var receiptText by remember { mutableStateOf("") }
-    var productName by remember { mutableStateOf("") }
-    var store by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
-    var priceText by remember { mutableStateOf("") }
+    var productName by remember(existing) { mutableStateOf(existing?.productName.orEmpty()) }
+    var store by remember(existing) { mutableStateOf(existing?.store.orEmpty()) }
+    var category by remember(existing) { mutableStateOf(existing?.category.orEmpty()) }
+    var priceText by remember(existing) { mutableStateOf(existing?.price?.let { formatPriceInput(it) }.orEmpty()) }
     var purchaseEpochDay by remember { mutableStateOf<Int?>(null) }
-    var purchaseDateRawGuess by remember { mutableStateOf<String?>(null) }
+    var purchaseDateRawGuess by remember(existing) { mutableStateOf(existing?.purchaseDateLabel) }
     var showPurchaseDatePicker by remember { mutableStateOf(false) }
-    val policyDrafts = remember { mutableStateListOf<PolicyDraft>() }
+    val policyDrafts = remember(existing) {
+        mutableStateListOf<PolicyDraft>().apply { existing?.policies?.forEach { add(it.toDraft()) } }
+    }
     var scansCount by remember { mutableStateOf(0) }
     var showPolicyEditor by remember { mutableStateOf(false) }
+    var confirmingDelete by remember { mutableStateOf(false) }
     val canSave = productName.isNotBlank()
 
     val purchaseDateLabel = purchaseEpochDay?.let { formatEpochDayLabel(it) } ?: purchaseDateRawGuess.orEmpty()
@@ -138,9 +159,13 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 28.dp)) {
             Text("Warranty Radar", color = colors.accent, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Spacer(Modifier.height(28.dp))
-            Text("Add a receipt", color = colors.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Text(if (existing != null) "Edit purchase" else "Add a receipt", color = colors.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
-            Text("Fill in the purchase details. We'll help you keep track of the warranty.", color = colors.mutedInk, lineHeight = 22.sp)
+            Text(
+                if (existing != null) "Update the details or coverage for this purchase." else "Fill in the purchase details. We'll help you keep track of the warranty.",
+                color = colors.mutedInk,
+                lineHeight = 22.sp
+            )
             Spacer(Modifier.height(24.dp))
 
             LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -205,6 +230,24 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
                 }
             }
 
+            if (existing != null && onDelete != null) {
+                Spacer(Modifier.height(16.dp))
+                if (confirmingDelete) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text("Delete this purchase for good?", color = colors.alert, fontSize = 13.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+                        Text("Keep it", color = colors.mutedInk, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = { confirmingDelete = false }).padding(6.dp))
+                        Text("Delete", color = colors.alert, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable(onClick = onDelete).padding(6.dp))
+                    }
+                } else {
+                    Text(
+                        "Delete purchase",
+                        color = colors.alert,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable(onClick = { confirmingDelete = true })
+                    )
+                }
+            }
             Spacer(Modifier.height(16.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(
@@ -217,6 +260,7 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
                     onClick = {
                         onSaved(
                             buildWarranty(
+                                id = existing?.id,
                                 productName = productName,
                                 store = store,
                                 category = category,
@@ -231,7 +275,7 @@ fun PasteReceiptScreen(onSaved: (Warranty) -> Unit, onCancel: () -> Unit) {
                     modifier = Modifier.weight(1f).height(54.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.accent)
-                ) { Text("Save receipt", fontWeight = FontWeight.Bold) }
+                ) { Text(if (existing != null) "Save changes" else "Save receipt", fontWeight = FontWeight.Bold) }
             }
         }
     }
@@ -250,9 +294,10 @@ private fun buildWarranty(
     priceText: String,
     purchaseDateLabel: String,
     purchaseEpochDay: Int?,
-    drafts: List<PolicyDraft>
+    drafts: List<PolicyDraft>,
+    id: String? = null
 ): Warranty {
-    val id = newWarrantyId()
+    val id = id ?: newWarrantyId()
     val today = todayEpochDay()
     val anchorDay = purchaseEpochDay ?: today
     val policies = drafts.mapIndexed { index, draft ->
