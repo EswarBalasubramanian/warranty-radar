@@ -10,8 +10,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.example.project.model.CoveragePolicy
 import org.example.project.model.Currency
-import org.example.project.model.PolicyKind
-import org.example.project.model.PolicySource
 import org.example.project.model.ProductShape
 import org.example.project.model.Warranty
 import org.example.project.model.currencyFrom
@@ -31,9 +29,6 @@ interface WarrantyRepository {
 fun createWarrantyRepository(factory: DatabaseDriverFactory): WarrantyRepository {
     val driver = factory.createDriver() ?: return InMemoryWarrantyRepository()
     val queries = WarrantyDatabase(driver).warrantyQueries
-    if (queries.countAll().executeAsOne() == 0L) {
-        seedWarranties().forEach { queries.insertWarranty(it) }
-    }
     return SqlDelightWarrantyRepository(queries)
 }
 
@@ -78,7 +73,7 @@ private class SqlDelightWarrantyRepository(private val queries: WarrantyQueries)
 }
 
 private class InMemoryWarrantyRepository : WarrantyRepository {
-    private val state = MutableStateFlow(seedWarranties())
+    private val state = MutableStateFlow(emptyList<Warranty>())
 
     override fun observeAll(): Flow<List<Warranty>> =
         state.map { warranties ->
@@ -161,54 +156,3 @@ private fun PolicyEntity.toPolicy() = CoveragePolicy(
     source = policySourceFrom(source)
 )
 
-private fun seedPolicy(
-    id: String,
-    kind: PolicyKind,
-    title: String,
-    provider: String? = null,
-    durationDays: Int? = null,
-    endsInDays: Int? = null
-): CoveragePolicy {
-    val end = endsInDays?.let { todayEpochDay() + it }
-    return CoveragePolicy(
-        id = id,
-        kind = kind,
-        title = title,
-        provider = provider,
-        durationDays = durationDays,
-        endEpochDay = end,
-        endDateLabel = end?.let { formatEpochDayLabel(it) },
-        source = PolicySource.Manual
-    )
-}
-
-private fun seedWarranties(): List<Warranty> = listOf(
-    Warranty(
-        "seed-1", "Apple Watch", "John Lewis", "Tech", "3 Jan 2026", "Protected", null, 399.0, ProductShape.Watch,
-        policies = listOf(
-            seedPolicy("seed-1-p1", PolicyKind.Warranty, "1 year Apple warranty", provider = "Apple", durationDays = 365, endsInDays = 140)
-        )
-    ),
-    Warranty("seed-2", "Desk lamp", "Habitat", "Home", "18 Feb 2026", "Protected", null, 45.0, ProductShape.Lamp),
-    Warranty(
-        "seed-3", "MacBook Air", "Apple", "Tech", "2 Jun 2025", "2 years left", null, 1299.0, ProductShape.Laptop,
-        policies = listOf(
-            seedPolicy("seed-3-p1", PolicyKind.Protection, "AppleCare+ cover", provider = "Apple", endsInDays = 700)
-        )
-    ),
-    Warranty("seed-4", "Coffee machine", "Currys", "Home", "9 Nov 2025", "Protected", null, 219.0, ProductShape.Coffee),
-    Warranty(
-        "seed-5", "Sony WH-1000XM5", "Currys", "Tech", "20 Apr 2026", "Return window ends", 3, 349.0, ProductShape.Other,
-        policies = listOf(
-            seedPolicy("seed-5-p1", PolicyKind.Return, "30-day returns", provider = "Currys", durationDays = 30, endsInDays = 3),
-            seedPolicy("seed-5-p2", PolicyKind.Warranty, "2 year manufacturer guarantee", provider = "Manufacturer", durationDays = 730, endsInDays = 680)
-        )
-    ),
-    Warranty(
-        "seed-6", "Ninja Air Fryer MAX", "Argos", "Home", "2 Jul 2026", "Return window ends", 16, 129.0, ProductShape.Other,
-        policies = listOf(
-            seedPolicy("seed-6-p1", PolicyKind.Replacement, "Replacement window", provider = "Argos", endsInDays = 16),
-            seedPolicy("seed-6-p2", PolicyKind.Warranty, "1 year guarantee", durationDays = 365, endsInDays = 349)
-        )
-    )
-)
