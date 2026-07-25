@@ -9,10 +9,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.example.project.model.CoveragePolicy
+import org.example.project.model.Currency
 import org.example.project.model.PolicyKind
 import org.example.project.model.PolicySource
 import org.example.project.model.ProductShape
 import org.example.project.model.Warranty
+import org.example.project.model.currencyFrom
 import org.example.project.model.formatEpochDayLabel
 import org.example.project.model.policyKindFrom
 import org.example.project.model.policySourceFrom
@@ -111,7 +113,8 @@ private fun WarrantyQueries.insertWarranty(warranty: Warranty) {
             price = warranty.price,
             shape = warranty.shape.name,
             warrantyEndDateLabel = warranty.warrantyEndDateLabel,
-            photoPath = warranty.photoPath
+            photoPath = warranty.photoPath,
+            currency = warranty.currency.name
         )
         warranty.policies.forEach { policy ->
             insertPolicy(
@@ -142,7 +145,8 @@ private fun WarrantyEntity.toWarranty(policies: List<CoveragePolicy>) = Warranty
     shape = ProductShape.valueOf(shape),
     warrantyEndDateLabel = warrantyEndDateLabel,
     policies = policies,
-    photoPath = photoPath
+    photoPath = photoPath,
+    currency = currencyFrom(currency)
 )
 
 private fun PolicyEntity.toPolicy() = CoveragePolicy(

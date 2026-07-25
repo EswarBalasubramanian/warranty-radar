@@ -88,8 +88,13 @@ private fun ProfileHeader() {
 @Composable
 private fun StatsCard(warranties: List<Warranty>) {
     val colors = AppTheme.colors
-    val totalValue = warranties.sumOf { it.price ?: 0.0 }
     val storeCount = warranties.map { it.store }.distinct().size
+    val totalsByCurrency = warranties
+        .filter { it.price != null }
+        .groupBy { it.currency }
+        .mapValues { (_, group) -> group.sumOf { it.price ?: 0.0 } }
+        .toList()
+        .sortedByDescending { it.second }
     Surface(
         modifier = Modifier.fillMaxWidth().border(1.dp, colors.divider, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
@@ -98,7 +103,13 @@ private fun StatsCard(warranties: List<Warranty>) {
         Column(modifier = Modifier.padding(18.dp)) {
             Text("Your library at a glance", color = colors.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(14.dp))
-            ProfileStatRow("Total covered value", formatCurrency(totalValue))
+            if (totalsByCurrency.isEmpty()) {
+                ProfileStatRow("Total covered value", "—")
+            } else {
+                totalsByCurrency.forEach { (currency, total) ->
+                    ProfileStatRow("Covered value (${currency.name})", formatCurrency(total, currency.symbol))
+                }
+            }
             ProfileStatRow("Purchases tracked", warranties.size.toString())
             ProfileStatRow("Stores", storeCount.toString())
         }

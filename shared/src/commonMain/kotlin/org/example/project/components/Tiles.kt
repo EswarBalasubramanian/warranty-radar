@@ -56,10 +56,10 @@ fun tileColorFor(shape: ProductShape, colors: AppColorScheme): Color = when (sha
     ProductShape.Other -> colors.softMint
 }
 
-fun formatCurrency(amount: Double): String {
+fun formatCurrency(amount: Double, symbol: String = "£"): String {
     val rounded = amount.toLong()
     val grouped = rounded.toString().reversed().chunked(3).joinToString(",").reversed()
-    return "£$grouped"
+    return "$symbol$grouped"
 }
 
 @Composable

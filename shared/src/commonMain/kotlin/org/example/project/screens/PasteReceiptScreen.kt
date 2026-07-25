@@ -49,6 +49,7 @@ import org.example.project.components.NavigationIcon
 import org.example.project.components.friendlyTimeLeft
 import org.example.project.components.policyKindColor
 import org.example.project.model.CoveragePolicy
+import org.example.project.model.Currency
 import org.example.project.model.PolicyDraft
 import org.example.project.model.PolicyKind
 import org.example.project.model.PolicySource
@@ -109,6 +110,7 @@ fun PasteReceiptScreen(
     var category by remember(existing) { mutableStateOf(existing?.category.orEmpty()) }
     var photoPath by remember(existing) { mutableStateOf(existing?.photoPath) }
     var priceText by remember(existing) { mutableStateOf(existing?.price?.let { formatPriceInput(it) }.orEmpty()) }
+    var currency by remember(existing) { mutableStateOf(existing?.currency ?: Currency.GBP) }
     var purchaseEpochDay by remember { mutableStateOf<Int?>(null) }
     var purchaseDateRawGuess by remember(existing) { mutableStateOf(existing?.purchaseDateLabel) }
     var showPurchaseDatePicker by remember { mutableStateOf(false) }
@@ -207,7 +209,17 @@ fun PasteReceiptScreen(
                         }
                     }
                 }
-                item { LabeledField("Price", priceText, { priceText = it }, "e.g. 349.00") }
+                item {
+                    Column {
+                        LabeledField("Price", priceText, { priceText = it }, "e.g. 349.00")
+                        Spacer(Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Currency.entries.forEach { option ->
+                                FilterPill(option.label, currency == option, onClick = { currency = option })
+                            }
+                        }
+                    }
+                }
                 item {
                     DateField(
                         label = "Purchase date",
@@ -290,7 +302,8 @@ fun PasteReceiptScreen(
                                 purchaseDateLabel = purchaseDateLabel,
                                 purchaseEpochDay = purchaseEpochDay,
                                 drafts = policyDrafts.toList(),
-                                photoPath = photoPath
+                                photoPath = photoPath,
+                                currency = currency
                             )
                         )
                     },
@@ -319,7 +332,8 @@ private fun buildWarranty(
     purchaseEpochDay: Int?,
     drafts: List<PolicyDraft>,
     id: String? = null,
-    photoPath: String? = null
+    photoPath: String? = null,
+    currency: Currency = Currency.GBP
 ): Warranty {
     val id = id ?: newWarrantyId()
     val today = todayEpochDay()
@@ -351,7 +365,8 @@ private fun buildWarranty(
         warrantyEndDateLabel = policies.firstOrNull { it.kind == PolicyKind.Warranty }?.endDateLabel
             ?: policies.firstOrNull()?.endDateLabel,
         policies = policies,
-        photoPath = photoPath
+        photoPath = photoPath,
+        currency = currency
     )
 }
 

@@ -1,0 +1,1 @@
+ALTER TABLE warrantyEntity ADD COLUMN currency TEXT NOT NULL DEFAULT 'GBP';

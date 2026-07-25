@@ -189,7 +189,7 @@ private fun HeroCard(warranty: Warranty, onClick: () -> Unit) {
                     modifier = Modifier.weight(1f)
                 )
                 if (warranty.price != null) {
-                    Text(formatCurrency(warranty.price), color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(formatCurrency(warranty.price, warranty.currency.symbol), color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
             if (warranty.policies.isNotEmpty()) {

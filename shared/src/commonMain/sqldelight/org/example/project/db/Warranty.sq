@@ -9,7 +9,8 @@ CREATE TABLE warrantyEntity (
     price REAL,
     shape TEXT NOT NULL,
     warrantyEndDateLabel TEXT,
-    photoPath TEXT
+    photoPath TEXT,
+    currency TEXT NOT NULL DEFAULT 'GBP'
 );
 
 -- One row per warranty / replacement / return / service promise. kind and source
@@ -35,8 +36,8 @@ countAll:
 SELECT COUNT(*) FROM warrantyEntity;
 
 insertWarranty:
-INSERT INTO warrantyEntity(id, productName, store, category, purchaseDateLabel, warrantyStatusLabel, urgencyDays, price, shape, warrantyEndDateLabel, photoPath)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO warrantyEntity(id, productName, store, category, purchaseDateLabel, warrantyStatusLabel, urgencyDays, price, shape, warrantyEndDateLabel, photoPath, currency)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 selectAllPolicies:
 SELECT * FROM policyEntity;

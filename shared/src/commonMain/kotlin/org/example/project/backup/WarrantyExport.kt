@@ -46,6 +46,7 @@ private fun Warranty.toJson(): String = """
       "shape": ${jsonString(shape.name)},
       "warrantyEndDateLabel": ${jsonString(warrantyEndDateLabel)},
       "photoPath": ${jsonString(photoPath)},
+      "currency": ${jsonString(currency.name)},
       "policies": [${policies.joinToString(",") { it.toJson() }}]
     }
 """.trimIndent()
