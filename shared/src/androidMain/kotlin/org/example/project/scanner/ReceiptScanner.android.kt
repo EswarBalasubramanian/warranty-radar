@@ -46,7 +46,8 @@ actual fun rememberReceiptScannerController(onScanned: (ScannedReceipt) -> Unit)
                     status.value = ScanStatus.Error("Couldn't find any text in that file.")
                     return@launch
                 }
-                onScanned(parseReceiptGuesses(rawText))
+                val photoPath = if (isPdf) null else persistReceiptPhoto(context, uri)
+                onScanned(parseReceiptGuesses(rawText).copy(photoPath = photoPath))
                 status.value = ScanStatus.Idle
             } catch (t: Throwable) {
                 status.value = ScanStatus.Error(t.message ?: "Couldn't read that file.")
@@ -101,6 +102,22 @@ private fun createTempImageUri(context: Context): Uri {
     val capturesDir = File(context.cacheDir, "receipt_captures").apply { mkdirs() }
     val file = File(capturesDir, "receipt_${System.currentTimeMillis()}.jpg")
     return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+}
+
+// Camera/gallery photos otherwise live only in cache (purgeable anytime) or as a
+// content:// Uri we may lose read access to later, so a scanned image is copied
+// into permanent app storage the moment OCR succeeds on it.
+private fun persistReceiptPhoto(context: Context, uri: Uri): String? {
+    val photosDir = File(context.filesDir, "receipt_photos").apply { mkdirs() }
+    val destination = File(photosDir, "receipt_${System.currentTimeMillis()}.jpg")
+    return try {
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            destination.outputStream().use { output -> input.copyTo(output) }
+        }
+        destination.absolutePath
+    } catch (_: Throwable) {
+        null
+    }
 }
 
 private suspend fun recognizeTextFromImage(context: Context, uri: Uri): String {

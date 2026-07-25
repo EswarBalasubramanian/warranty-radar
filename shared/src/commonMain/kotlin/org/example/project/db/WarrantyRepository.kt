@@ -65,10 +65,12 @@ private class SqlDelightWarrantyRepository(private val queries: WarrantyQueries)
 
     override suspend fun delete(id: String) {
         withContext(Dispatchers.Default) {
+            val photoPath = queries.selectPhotoPathById(id).executeAsOneOrNull()?.photoPath
             queries.transaction {
                 queries.deletePoliciesForWarranty(id)
                 queries.deleteWarrantyById(id)
             }
+            photoPath?.let { deleteStoredFile(it) }
         }
     }
 }
@@ -91,6 +93,7 @@ private class InMemoryWarrantyRepository : WarrantyRepository {
     }
 
     override suspend fun delete(id: String) {
+        state.value.firstOrNull { it.id == id }?.photoPath?.let { deleteStoredFile(it) }
         state.value = state.value.filterNot { it.id == id }
     }
 }
@@ -107,7 +110,8 @@ private fun WarrantyQueries.insertWarranty(warranty: Warranty) {
             urgencyDays = warranty.urgencyDays?.toLong(),
             price = warranty.price,
             shape = warranty.shape.name,
-            warrantyEndDateLabel = warranty.warrantyEndDateLabel
+            warrantyEndDateLabel = warranty.warrantyEndDateLabel,
+            photoPath = warranty.photoPath
         )
         warranty.policies.forEach { policy ->
             insertPolicy(
@@ -137,7 +141,8 @@ private fun WarrantyEntity.toWarranty(policies: List<CoveragePolicy>) = Warranty
     price = price,
     shape = ProductShape.valueOf(shape),
     warrantyEndDateLabel = warrantyEndDateLabel,
-    policies = policies
+    policies = policies,
+    photoPath = photoPath
 )
 
 private fun PolicyEntity.toPolicy() = CoveragePolicy(

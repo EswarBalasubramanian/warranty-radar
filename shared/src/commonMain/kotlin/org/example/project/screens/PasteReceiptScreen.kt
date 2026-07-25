@@ -98,13 +98,16 @@ fun PasteReceiptScreen(
     onSaved: (Warranty) -> Unit,
     onCancel: () -> Unit,
     existing: Warranty? = null,
-    onDelete: (() -> Unit)? = null
+    onDelete: (() -> Unit)? = null,
+    existingCategories: List<String> = emptyList(),
+    onViewPhoto: (String) -> Unit = {}
 ) {
     val colors = AppTheme.colors
     var receiptText by remember { mutableStateOf("") }
     var productName by remember(existing) { mutableStateOf(existing?.productName.orEmpty()) }
     var store by remember(existing) { mutableStateOf(existing?.store.orEmpty()) }
     var category by remember(existing) { mutableStateOf(existing?.category.orEmpty()) }
+    var photoPath by remember(existing) { mutableStateOf(existing?.photoPath) }
     var priceText by remember(existing) { mutableStateOf(existing?.price?.let { formatPriceInput(it) }.orEmpty()) }
     var purchaseEpochDay by remember { mutableStateOf<Int?>(null) }
     var purchaseDateRawGuess by remember(existing) { mutableStateOf(existing?.purchaseDateLabel) }
@@ -132,6 +135,7 @@ fun PasteReceiptScreen(
         policyDrafts.clear()
         policyDrafts.addAll(merged)
         receiptText = if (receiptText.isBlank()) scanned.rawText else receiptText + "\n\n" + scanned.rawText
+        scanned.photoPath?.let { photoPath = it }
         scansCount += 1
     }
 
@@ -171,7 +175,22 @@ fun PasteReceiptScreen(
             LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 item { LabeledField("Product name", productName, { productName = it }, "e.g. Sony WH-1000XM5") }
                 item { LabeledField("Store", store, { store = it }, "e.g. Currys") }
-                item { LabeledField("Category", category, { category = it }, "e.g. Tech") }
+                item {
+                    Column {
+                        LabeledField("Category", category, { category = it }, "e.g. Tech")
+                        if (existingCategories.isNotEmpty()) {
+                            Spacer(Modifier.height(8.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                existingCategories.take(6).forEach { suggestion ->
+                                    FilterPill(suggestion, category == suggestion, onClick = { category = suggestion })
+                                }
+                            }
+                        }
+                    }
+                }
                 item { LabeledField("Price", priceText, { priceText = it }, "e.g. 349.00") }
                 item {
                     DateField(
@@ -204,6 +223,9 @@ fun PasteReceiptScreen(
                             onCancel = { showPolicyEditor = false }
                         )
                     }
+                }
+                if (photoPath != null) {
+                    item { ReceiptPhotoCard(onView = { onViewPhoto(photoPath!!) }) }
                 }
                 item {
                     Column {
@@ -267,7 +289,8 @@ fun PasteReceiptScreen(
                                 priceText = priceText,
                                 purchaseDateLabel = purchaseDateLabel,
                                 purchaseEpochDay = purchaseEpochDay,
-                                drafts = policyDrafts.toList()
+                                drafts = policyDrafts.toList(),
+                                photoPath = photoPath
                             )
                         )
                     },
@@ -295,7 +318,8 @@ private fun buildWarranty(
     purchaseDateLabel: String,
     purchaseEpochDay: Int?,
     drafts: List<PolicyDraft>,
-    id: String? = null
+    id: String? = null,
+    photoPath: String? = null
 ): Warranty {
     val id = id ?: newWarrantyId()
     val today = todayEpochDay()
@@ -326,7 +350,8 @@ private fun buildWarranty(
         shape = ProductShape.Other,
         warrantyEndDateLabel = policies.firstOrNull { it.kind == PolicyKind.Warranty }?.endDateLabel
             ?: policies.firstOrNull()?.endDateLabel,
-        policies = policies
+        policies = policies,
+        photoPath = photoPath
     )
 }
 
@@ -626,6 +651,31 @@ private fun LabeledField(label: String, value: String, onValueChange: (String) -
             singleLine = true,
             shape = RoundedCornerShape(14.dp)
         )
+    }
+}
+
+@Composable
+private fun ReceiptPhotoCard(onView: () -> Unit) {
+    val colors = AppTheme.colors
+    Surface(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onView),
+        shape = RoundedCornerShape(14.dp),
+        color = colors.uploadBackground
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(colors.uploadIconBackground), contentAlignment = Alignment.Center) {
+                Text("▣", color = colors.accent, fontSize = 18.sp)
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Receipt photo saved", color = colors.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text("Tap to view the original", color = colors.mutedInk, fontSize = 12.sp)
+            }
+            Text("View", color = colors.accent, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        }
     }
 }
 

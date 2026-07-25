@@ -19,8 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.example.project.components.ALL_CATEGORIES
 import org.example.project.components.BottomNavigation
 import org.example.project.components.SavedCelebration
+import org.example.project.components.categoriesFor
 import org.example.project.db.DatabaseDriverFactory
 import org.example.project.db.createWarrantyRepository
 import org.example.project.screens.CalendarScreen
@@ -36,7 +38,15 @@ import org.example.project.theme.WarrantyRadarTheme
 enum class AppScreen { Home, Items, Calendar, Profile, PasteReceipt }
 
 @Composable
-fun App(driverFactory: DatabaseDriverFactory, startScreen: AppScreen = AppScreen.Home) {
+fun App(
+    driverFactory: DatabaseDriverFactory,
+    startScreen: AppScreen = AppScreen.Home,
+    pendingEditWarrantyId: String? = null,
+    onViewPhoto: (String) -> Unit = {},
+    enabledReminderThresholds: Set<Int> = emptySet(),
+    onReminderThresholdsChange: (Set<Int>) -> Unit = {},
+    onExport: (List<Warranty>) -> Unit = {}
+) {
     val repository = remember { createWarrantyRepository(driverFactory) }
     val warranties by repository.observeAll().collectAsState(initial = emptyList())
     val coroutineScope = rememberCoroutineScope()
@@ -44,6 +54,7 @@ fun App(driverFactory: DatabaseDriverFactory, startScreen: AppScreen = AppScreen
     var themeMode by remember { mutableStateOf(ThemeMode.System) }
     var celebrateSave by remember { mutableStateOf(false) }
     var editingWarranty by remember { mutableStateOf<Warranty?>(null) }
+    var pendingId by remember { mutableStateOf(pendingEditWarrantyId) }
     val openEditor: (Warranty) -> Unit = { warranty ->
         editingWarranty = warranty
         screen = AppScreen.PasteReceipt
@@ -53,6 +64,14 @@ fun App(driverFactory: DatabaseDriverFactory, startScreen: AppScreen = AppScreen
         if (celebrateSave) {
             delay(2400)
             celebrateSave = false
+        }
+    }
+
+    LaunchedEffect(warranties, pendingId) {
+        val id = pendingId ?: return@LaunchedEffect
+        warranties.firstOrNull { it.id == id }?.let { warranty ->
+            openEditor(warranty)
+            pendingId = null
         }
     }
 
@@ -69,7 +88,14 @@ fun App(driverFactory: DatabaseDriverFactory, startScreen: AppScreen = AppScreen
                     CalendarScreen(warranties)
                 }
                 AppScreen.Profile -> AppScaffold(AppScreen.Profile, onNavigate = { screen = it }, onAddReceipt = { editingWarranty = null; screen = AppScreen.PasteReceipt }) {
-                    ProfileScreen(warranties, themeMode, onThemeModeChange = { themeMode = it })
+                    ProfileScreen(
+                        warranties,
+                        themeMode,
+                        onThemeModeChange = { themeMode = it },
+                        enabledReminderThresholds = enabledReminderThresholds,
+                        onReminderThresholdsChange = onReminderThresholdsChange,
+                        onExport = { onExport(warranties) }
+                    )
                 }
                 AppScreen.PasteReceipt -> PasteReceiptScreen(
                     existing = editingWarranty,
@@ -89,7 +115,9 @@ fun App(driverFactory: DatabaseDriverFactory, startScreen: AppScreen = AppScreen
                             editingWarranty = null
                             screen = AppScreen.Home
                         }
-                    }
+                    },
+                    existingCategories = remember(warranties) { categoriesFor(warranties) - ALL_CATEGORIES },
+                    onViewPhoto = onViewPhoto
                 )
             }
             SavedCelebration(

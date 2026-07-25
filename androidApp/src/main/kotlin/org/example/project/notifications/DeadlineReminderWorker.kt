@@ -27,7 +27,6 @@ import org.example.project.model.todayEpochDay
 
 private const val CHANNEL_ID = "deadline_reminders"
 private const val UNIQUE_WORK_NAME = "deadline_reminder_check"
-private val reminderThresholds = setOf(7, 3, 1, 0)
 
 class DeadlineReminderWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
@@ -38,6 +37,7 @@ class DeadlineReminderWorker(context: Context, params: WorkerParameters) : Corou
             return Result.success()
         }
 
+        val reminderThresholds = ReminderPreferences(context).getEnabledThresholds()
         val repository = createWarrantyRepository(DatabaseDriverFactory(context))
         val warranties = repository.observeAll().first()
         val today = todayEpochDay()
@@ -74,10 +74,11 @@ class DeadlineReminderWorker(context: Context, params: WorkerParameters) : Corou
         }
         val openIntent = android.content.Intent(context, MainActivity::class.java).apply {
             flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(MainActivity.EXTRA_WARRANTY_ID, deadline.warranty.id)
         }
         val pendingIntent = PendingIntent.getActivity(
             context,
-            0,
+            notificationRequestCode(deadline),
             openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -90,9 +91,11 @@ class DeadlineReminderWorker(context: Context, params: WorkerParameters) : Corou
             .setContentIntent(pendingIntent)
             .build()
 
-        val notificationId = (deadline.warranty.id + (deadline.policy?.id ?: "warranty") + deadline.daysLeft).hashCode()
-        androidx.core.app.NotificationManagerCompat.from(context).notify(notificationId, notification)
+        androidx.core.app.NotificationManagerCompat.from(context).notify(notificationRequestCode(deadline), notification)
     }
+
+    private fun notificationRequestCode(deadline: PolicyDeadline): Int =
+        (deadline.warranty.id + (deadline.policy?.id ?: "warranty") + deadline.daysLeft).hashCode()
 }
 
 fun scheduleDeadlineReminders(context: Context) {
