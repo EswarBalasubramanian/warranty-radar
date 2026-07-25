@@ -1,6 +1,8 @@
 package org.example.project.scanner
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
@@ -14,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import java.io.File
 import kotlinx.coroutines.launch
@@ -64,12 +67,30 @@ actual fun rememberReceiptScannerController(onScanned: (ScannedReceipt) -> Unit)
         }
     }
 
+    fun launchCamera() {
+        val uri = createTempImageUri(context)
+        pendingCameraUri = uri
+        cameraLauncher.launch(uri)
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            launchCamera()
+        } else {
+            status.value = ScanStatus.Error("Camera permission is needed to take a photo. Enable it in your device settings.")
+        }
+    }
+
     return ReceiptScannerController(
         statusState = status,
         captureFromCamera = {
-            val uri = createTempImageUri(context)
-            pendingCameraUri = uri
-            cameraLauncher.launch(uri)
+            val hasPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED
+            if (hasPermission) {
+                launchCamera()
+            } else {
+                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
         },
         pickFromGallery = { galleryLauncher.launch("image/*") },
         pickPdf = { pdfLauncher.launch(arrayOf("application/pdf")) }

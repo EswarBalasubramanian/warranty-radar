@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Warranty Radar</string>
+    <string name="shortcut_add_receipt_short">Add Receipt</string>
+    <string name="shortcut_add_receipt_long">Add a new receipt</string>
 </resources>
