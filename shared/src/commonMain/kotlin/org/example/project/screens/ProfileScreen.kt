@@ -37,7 +37,7 @@ import org.example.project.model.Warranty
 import org.example.project.theme.AppTheme
 import org.example.project.theme.ThemeMode
 
-val reminderThresholdOptions = listOf(14 to "2 weeks", 7 to "1 week", 3 to "3 days", 1 to "1 day", 0 to "Due day")
+val reminderThresholdOptions = listOf(7 to "1 week", 3 to "3 days", 1 to "1 day", 0 to "Due day")
 
 @Composable
 fun ProfileScreen(
